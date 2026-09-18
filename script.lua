@@ -1,7 +1,7 @@
 --[[
   ╔═══════════════════════════════════════════════════════════╗
-  ║                    v.2 build                          ║
-  ║                drakozz hub v.2 build                    ║
+  ║                    claude.xyz                         ║
+  ║                console edition v1.0                  ║
   ╚═══════════════════════════════════════════════════════════╝
 ]]
 local IMMUNE_USER = "6FATALXXX"
@@ -33,25 +33,14 @@ local ALLOWED_USERS = {
 if not lp then return end
 
 -- Key system settings. The two owner accounts bypass the key screen.
-local DRAKOZZ_DISCORD = "https://discord.gg/keuwRAmNS"
+local CLAUDE_DISCORD = "https://discord.gg/claudexyz"
 local NEEDS_KEY = not ALLOWED_USERS[string.lower(lp.Name or "")]
 
--- 24-hour rotating key schedule.
--- Cycle starts at 2026-09-10 00:00:00 UTC. Each key is active for 24 hours,
--- then the next key is used. After key #3, the cycle returns to key #1.
-local KEY_ROTATION_START_UTC = 1788998400
-local KEY_ROTATION_SECONDS = 24 * 60 * 60
-local DRAKOZZ_KEYS = {
-    "drakozzontopwelovethev3",
-    "omgdrakozziloveyoupapi",
-    "drakozzownsmehessogoodatthegame",
-}
+-- claude.xyz uses a single fixed key: denizontop
+local CLAUDE_KEY = "denizontop"
 
-local function getCurrentDrakozzKey()
-    local now = os.time()
-    local elapsed = now - KEY_ROTATION_START_UTC
-    local cycleIndex = math.floor(elapsed / KEY_ROTATION_SECONDS) % #DRAKOZZ_KEYS
-    return DRAKOZZ_KEYS[cycleIndex + 1], cycleIndex + 1
+local function getCurrentClaudeKey()
+    return CLAUDE_KEY
 end
 
 local clock = os.clock
@@ -68,26 +57,28 @@ local abs = math.abs
 -- ════════════════════════════════════════════════════════════
 -- THEME
 -- ════════════════════════════════════════════════════════════
+-- THEME — claude.xyz console build
+-- ════════════════════════════════════════════════════════════
 local T = {
-    BG      = Color3.fromRGB(8,8,10),
-    CARD    = Color3.fromRGB(22,22,27),
-    RAISED  = Color3.fromRGB(32,32,38),
-    BORDER  = Color3.fromRGB(50,50,60),
-    TEXT    = Color3.fromRGB(242,242,242),
-    MUTED   = Color3.fromRGB(138,138,148),
-    DIM     = Color3.fromRGB(68,68,80),
-    ACCENT  = Color3.fromRGB(138,180,248),
-    ON      = Color3.fromRGB(120,220,120),
-    OFF     = Color3.fromRGB(50,50,60),
-    WARN    = Color3.fromRGB(200,185,120),
-    ERR     = Color3.fromRGB(200,80,80),
+    BG      = Color3.fromRGB(12,10,9),
+    CARD    = Color3.fromRGB(24,20,17),
+    RAISED  = Color3.fromRGB(38,32,28),
+    BORDER  = Color3.fromRGB(70,60,52),
+    TEXT    = Color3.fromRGB(238,232,224),
+    MUTED   = Color3.fromRGB(160,148,138),
+    DIM     = Color3.fromRGB(96,86,78),
+    ACCENT  = Color3.fromRGB(217,119,87),
+    ON      = Color3.fromRGB(110,196,140),
+    OFF     = Color3.fromRGB(45,38,34),
+    WARN    = Color3.fromRGB(228,178,96),
+    ERR     = Color3.fromRGB(224,88,72),
 }
 
 -- ════════════════════════════════════════════════════════════
 -- SAVE
 -- ════════════════════════════════════════════════════════════
 local SAVE = {}
-local SAVE_FILE = "krx_v1.json"
+local SAVE_FILE = "claude_xyz_v1.json"
 pcall(function()
     if readfile then
         local ok,d = pcall(function() return Http:JSONDecode(readfile(SAVE_FILE)) end)
@@ -209,15 +200,15 @@ end)
 -- ════════════════════════════════════════════════════════════
 -- GUI
 -- ════════════════════════════════════════════════════════════
-pcall(function() local o=CoreGui:FindFirstChild("KRX_v45_ultra"); if o then o:Destroy() end end)
+pcall(function() local o=CoreGui:FindFirstChild("CLX_v1_ultra"); if o then o:Destroy() end end)
 local GUI = Instance.new("ScreenGui")
-GUI.Name="KRX_v45_ultra"; GUI.ResetOnSpawn=false
+GUI.Name="CLX_v1_ultra"; GUI.ResetOnSpawn=false
 GUI.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
 GUI.IgnoreGuiInset=true; GUI.Parent=CoreGui
 
-local Bold = Font.new("rbxasset://fonts/families/Montserrat.json",Enum.FontWeight.Bold)
-local Semi = Font.new("rbxasset://fonts/families/Montserrat.json",Enum.FontWeight.SemiBold)
-local Reg  = Font.new("rbxasset://fonts/families/Montserrat.json",Enum.FontWeight.Regular)
+local Bold = Font.new("rbxasset://fonts/families/RobotoMono.json",  Enum.FontWeight.Bold)
+local Semi = Font.new("rbxasset://fonts/families/RobotoMono.json",  Enum.FontWeight.SemiBold)
+local Reg  = Font.new("rbxasset://fonts/families/RobotoMono.json",  Enum.FontWeight.Regular)
 
 -- ════════════════════════════════════════════════════════════
 -- UI HELPERS
@@ -249,13 +240,13 @@ local function Tw(obj,props,time,style,dir)
 end
 
 -- ════════════════════════════════════════════════════════════
--- DRAKOZZ V3 KEY SYSTEM
+-- CLAUDE.XYZ KEY SYSTEM
 -- ════════════════════════════════════════════════════════════
 local function copyDiscordLink()
     local copied = false
     pcall(function()
         if setclipboard then
-            setclipboard(DRAKOZZ_DISCORD)
+            setclipboard(CLAUDE_DISCORD)
             copied = true
         end
     end)
@@ -267,19 +258,19 @@ local function showKeySystem()
 
     local passed = Instance.new("BindableEvent")
     local keyGui = Instance.new("Frame")
-    keyGui.Name = "DRAKOZZ_KeySystem"
+    keyGui.Name = "CLAUDE_KeySystem"
     keyGui.Size = UDim2.fromScale(1,1)
-    keyGui.BackgroundColor3 = Color3.fromRGB(3,2,16)
+    keyGui.BackgroundColor3 = Color3.fromRGB(12,10,9)
     keyGui.BorderSizePixel = 0
     keyGui.ZIndex = 5000
     keyGui.Parent = GUI
 
     local gradient = Instance.new("UIGradient")
     gradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(4,2,20)),
-        ColorSequenceKeypoint.new(0.45, Color3.fromRGB(22,6,55)),
-        ColorSequenceKeypoint.new(0.72, Color3.fromRGB(7,22,65)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(2,3,18)),
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(12,10,9)),
+        ColorSequenceKeypoint.new(0.45, Color3.fromRGB(52,32,20)),
+        ColorSequenceKeypoint.new(0.72, Color3.fromRGB(24,38,26)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(10,9,8)),
     })
     gradient.Rotation = 25
     gradient.Parent = keyGui
@@ -290,7 +281,7 @@ local function showKeySystem()
         local s = rng:NextInteger(1,3)
         star.Size = UDim2.fromOffset(s,s)
         star.Position = UDim2.new(rng:NextNumber(0,1),0,rng:NextNumber(0,1),0)
-        star.BackgroundColor3 = (i%11==0) and Color3.fromRGB(196,160,255) or Color3.fromRGB(255,255,255)
+        star.BackgroundColor3 = (i%11==0) and Color3.fromRGB(217,119,87) or Color3.fromRGB(238,232,224)
         star.BackgroundTransparency = rng:NextNumber(0.18,0.75)
         star.BorderSizePixel = 0
         star.ZIndex = 5001
@@ -307,19 +298,19 @@ local function showKeySystem()
     card.AnchorPoint = Vector2.new(0.5,0.5)
     card.Position = UDim2.fromScale(0.5,0.5)
     card.Size = UDim2.new(0,520,0,350)
-    card.BackgroundColor3 = Color3.fromRGB(9,7,27)
+    card.BackgroundColor3 = Color3.fromRGB(12,10,9)
     card.BackgroundTransparency = 0.08
     card.BorderSizePixel = 0
     card.ZIndex = 5010
     card.Parent = keyGui
     Cnr(card,22)
-    Strk(card,Color3.fromRGB(143,83,255),1.8,0.08)
+    Strk(card,Color3.fromRGB(217,119,87),1.8,0.08)
 
     local cardGrad = Instance.new("UIGradient")
     cardGrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0,Color3.fromRGB(19,9,47)),
-        ColorSequenceKeypoint.new(0.5,Color3.fromRGB(9,12,39)),
-        ColorSequenceKeypoint.new(1,Color3.fromRGB(5,5,24)),
+        ColorSequenceKeypoint.new(0,Color3.fromRGB(24,20,17)),
+        ColorSequenceKeypoint.new(0.5,Color3.fromRGB(20,24,18)),
+        ColorSequenceKeypoint.new(1,Color3.fromRGB(12,10,9)),
     })
     cardGrad.Rotation = 90
     cardGrad.Parent = card
@@ -328,10 +319,10 @@ local function showKeySystem()
     welcome.BackgroundTransparency = 1
     welcome.Position = UDim2.new(0,28,0,26)
     welcome.Size = UDim2.new(1,-56,0,30)
-    welcome.Text = "WELCOME TO DRAKOZZ V3"
-    welcome.TextColor3 = Color3.fromRGB(255,255,255)
+    welcome.Text = "> WELCOME TO CLAUDE.XYZ"
+    welcome.TextColor3 = Color3.fromRGB(238,232,224)
     welcome.TextSize = 24
-    welcome.Font = Enum.Font.GothamBold
+    welcome.FontFace = Bold
     welcome.TextXAlignment = Enum.TextXAlignment.Center
     welcome.ZIndex = 5011
     welcome.Parent = card
@@ -341,9 +332,9 @@ local function showKeySystem()
     user.Position = UDim2.new(0,28,0,62)
     user.Size = UDim2.new(1,-56,0,24)
     user.Text = "USER: @" .. tostring(lp.Name)
-    user.TextColor3 = Color3.fromRGB(184,163,255)
+    user.TextColor3 = Color3.fromRGB(217,150,120)
     user.TextSize = 13
-    user.Font = Enum.Font.GothamSemibold
+    user.FontFace = Reg
     user.TextXAlignment = Enum.TextXAlignment.Center
     user.ZIndex = 5011
     user.Parent = card
@@ -353,9 +344,9 @@ local function showKeySystem()
     display.Position = UDim2.new(0,28,0,89)
     display.Size = UDim2.new(1,-56,0,20)
     display.Text = "DISPLAY: " .. tostring(lp.DisplayName)
-    display.TextColor3 = Color3.fromRGB(130,175,255)
+    display.TextColor3 = Color3.fromRGB(160,148,138)
     display.TextSize = 11
-    display.Font = Enum.Font.Gotham
+    display.FontFace = Reg
     display.TextXAlignment = Enum.TextXAlignment.Center
     display.ZIndex = 5011
     display.Parent = card
@@ -364,10 +355,10 @@ local function showKeySystem()
     verify.BackgroundTransparency = 1
     verify.Position = UDim2.new(0,28,0,124)
     verify.Size = UDim2.new(1,-56,0,24)
-    verify.Text = "VERIFY KEY"
-    verify.TextColor3 = Color3.fromRGB(255,255,255)
+    verify.Text = "> ENTER ACCESS KEY"
+    verify.TextColor3 = Color3.fromRGB(238,232,224)
     verify.TextSize = 16
-    verify.Font = Enum.Font.GothamBold
+    verify.FontFace = Bold
     verify.TextXAlignment = Enum.TextXAlignment.Center
     verify.ZIndex = 5011
     verify.Parent = card
@@ -375,30 +366,30 @@ local function showKeySystem()
     local box = Instance.new("TextBox")
     box.Position = UDim2.new(0,42,0,160)
     box.Size = UDim2.new(1,-84,0,48)
-    box.BackgroundColor3 = Color3.fromRGB(18,14,43)
+    box.BackgroundColor3 = Color3.fromRGB(24,20,17)
     box.BackgroundTransparency = 0.1
     box.BorderSizePixel = 0
     box.ClearTextOnFocus = false
-    box.PlaceholderText = "Enter your DRAKOZZ V3 key..."
-    box.PlaceholderColor3 = Color3.fromRGB(111,101,145)
+    box.PlaceholderText = "Enter your claude.xyz key..."
+    box.PlaceholderColor3 = Color3.fromRGB(96,86,78)
     box.Text = ""
-    box.TextColor3 = Color3.fromRGB(255,255,255)
+    box.TextColor3 = Color3.fromRGB(238,232,224)
     box.TextSize = 13
-    box.Font = Enum.Font.GothamSemibold
+    box.FontFace = Reg
     box.TextXAlignment = Enum.TextXAlignment.Center
     box.ZIndex = 5012
     box.Parent = card
     Cnr(box,12)
-    Strk(box,Color3.fromRGB(91,72,150),1,0.1)
+    Strk(box,Color3.fromRGB(70,60,52),1,0.1)
 
     local status = Instance.new("TextLabel")
     status.BackgroundTransparency = 1
     status.Position = UDim2.new(0,35,0,213)
     status.Size = UDim2.new(1,-70,0,22)
     status.Text = ""
-    status.TextColor3 = Color3.fromRGB(255,110,130)
+    status.TextColor3 = Color3.fromRGB(224,88,72)
     status.TextSize = 11
-    status.Font = Enum.Font.GothamSemibold
+    status.FontFace = Reg
     status.TextXAlignment = Enum.TextXAlignment.Center
     status.ZIndex = 5012
     status.Parent = card
@@ -406,12 +397,12 @@ local function showKeySystem()
     local check = Instance.new("TextButton")
     check.Position = UDim2.new(0,42,0,246)
     check.Size = UDim2.new(0.55,-10,0,48)
-    check.BackgroundColor3 = Color3.fromRGB(111,55,205)
+    check.BackgroundColor3 = Color3.fromRGB(217,119,87)
     check.BorderSizePixel = 0
     check.Text = "VERIFY KEY"
-    check.TextColor3 = Color3.fromRGB(255,255,255)
+    check.TextColor3 = Color3.fromRGB(24,20,17)
     check.TextSize = 13
-    check.Font = Enum.Font.GothamBold
+    check.FontFace = Bold
     check.ZIndex = 5012
     check.Parent = card
     Cnr(check,12)
@@ -419,37 +410,37 @@ local function showKeySystem()
     local discord = Instance.new("TextButton")
     discord.Position = UDim2.new(0.55,0,0,246)
     discord.Size = UDim2.new(0.45,-42,0,48)
-    discord.BackgroundColor3 = Color3.fromRGB(35,29,76)
+    discord.BackgroundColor3 = Color3.fromRGB(24,20,17)
     discord.BorderSizePixel = 0
     discord.Text = "DISCORD LINK"
-    discord.TextColor3 = Color3.fromRGB(206,190,255)
+    discord.TextColor3 = Color3.fromRGB(217,150,120)
     discord.TextSize = 11
-    discord.Font = Enum.Font.GothamBold
+    discord.FontFace = Bold
     discord.ZIndex = 5012
     discord.Parent = card
     Cnr(discord,12)
-    Strk(discord,Color3.fromRGB(82,68,135),1,0.15)
+    Strk(discord,Color3.fromRGB(70,60,52),1,0.15)
 
     local hint = Instance.new("TextLabel")
     hint.BackgroundTransparency = 1
     hint.Position = UDim2.new(0,35,1,-34)
     hint.Size = UDim2.new(1,-70,0,18)
-    hint.Text = "Get your key from the DRAKOZZ Discord server"
-    hint.TextColor3 = Color3.fromRGB(112,103,145)
+    hint.Text = "Get your key from the claude.xyz Discord server"
+    hint.TextColor3 = Color3.fromRGB(96,86,78)
     hint.TextSize = 9
-    hint.Font = Enum.Font.Gotham
+    hint.FontFace = Reg
     hint.TextXAlignment = Enum.TextXAlignment.Center
     hint.ZIndex = 5011
     hint.Parent = card
 
     discord.MouseButton1Click:Connect(function()
         if copyDiscordLink() then
-            status.Text = "link copied paste into browser"
-            status.TextColor3 = Color3.fromRGB(130,255,170)
+            status.Text = "> LINK COPIED TO CLIPBOARD"
+            status.TextColor3 = Color3.fromRGB(110,196,140)
         else
-            status.Text = "link copied paste into browser"
-            status.TextColor3 = Color3.fromRGB(255,220,120)
-            hint.Text = DRAKOZZ_DISCORD
+            status.Text = "> COPY FAILED — SEE LINK BELOW"
+            status.TextColor3 = Color3.fromRGB(228,178,96)
+            hint.Text = CLAUDE_DISCORD
         end
     end)
 
@@ -458,10 +449,10 @@ local function showKeySystem()
         if checking then return end
         checking = true
         local entered = tostring(box.Text or ""):gsub("^%s+"," "):gsub("%s+$","")
-        local currentKey, keyNumber = getCurrentDrakozzKey()
+        local currentKey = getCurrentClaudeKey()
         if entered == currentKey then
-            status.Text = "KEY VERIFIED • KEY " .. tostring(keyNumber) .. " ACTIVE"
-            status.TextColor3 = Color3.fromRGB(120,255,165)
+            status.Text = "> KEY ACCEPTED — WELCOME"
+            status.TextColor3 = Color3.fromRGB(110,196,140)
             check.Text = "VERIFIED"
             task.delay(0.35,function()
                 if keyGui.Parent then keyGui:Destroy() end
@@ -469,8 +460,8 @@ local function showKeySystem()
                 passed:Destroy()
             end)
         else
-            status.Text = "INVALID KEY"
-            status.TextColor3 = Color3.fromRGB(255,105,125)
+            status.Text = "> INVALID KEY — ACCESS DENIED"
+            status.TextColor3 = Color3.fromRGB(224,88,72)
             check.Text = "TRY AGAIN"
             task.delay(0.8,function() if check.Parent then check.Text="VERIFY KEY" end end)
             checking = false
@@ -491,26 +482,26 @@ end
 
 -- ════════════════════════════════════════════════════════════
 -- ════════════════════════════════════════════════════════════
--- DRAKOZZ V3 STATUS POPUP
+-- CLAUDE.XYZ STATUS POPUP
 -- ════════════════════════════════════════════════════════════
 -- ════════════════════════════════════════════════════════════
 local function showStatusPopup(showSuccess)
     local popup = Instance.new("Frame")
-    popup.Name = "DRAKOZZ_StatusPopup"
+    popup.Name = "CLAUDE_StatusPopup"
     popup.AnchorPoint = Vector2.new(0.5, 0)
     popup.Position = UDim2.new(0.5, 0, 0, -120)
     popup.Size = UDim2.new(0, 470, 0, 92)
-    popup.BackgroundColor3 = Color3.fromRGB(7, 5, 24)
+    popup.BackgroundColor3 = Color3.fromRGB(12, 10, 9)
     popup.BackgroundTransparency = 0.04
     popup.BorderSizePixel = 0
     popup.ZIndex = 1000
     popup.Parent = GUI
     Cnr(popup, 16)
-    Strk(popup, Color3.fromRGB(155, 92, 255), 1.7, 0.05)
+    Strk(popup, Color3.fromRGB(217, 119, 87), 1.7, 0.05)
 
     local bg = Instance.new("Frame")
     bg.Size = UDim2.fromScale(1, 1)
-    bg.BackgroundColor3 = Color3.fromRGB(8, 6, 30)
+    bg.BackgroundColor3 = Color3.fromRGB(10, 9, 8)
     bg.BorderSizePixel = 0
     bg.ZIndex = 1001
     bg.Parent = popup
@@ -518,18 +509,18 @@ local function showStatusPopup(showSuccess)
 
     local grad = Instance.new("UIGradient")
     grad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(12, 7, 42)),
-        ColorSequenceKeypoint.new(0.42, Color3.fromRGB(63, 17, 112)),
-        ColorSequenceKeypoint.new(0.72, Color3.fromRGB(20, 35, 110)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(7, 12, 44)),
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(12, 10, 9)),
+        ColorSequenceKeypoint.new(0.42, Color3.fromRGB(54, 34, 22)),
+        ColorSequenceKeypoint.new(0.72, Color3.fromRGB(26, 40, 28)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 9, 8)),
     })
     grad.Rotation = 18
     grad.Parent = bg
 
-    -- Small nebula glows.
+    -- Warm console glow pools.
     for _, data in ipairs({
-        {0.16,0.50,0.55,Color3.fromRGB(145,55,255)},
-        {0.82,0.36,0.48,Color3.fromRGB(50,95,255)},
+        {0.16,0.50,0.55,Color3.fromRGB(150,80,50)},
+        {0.82,0.36,0.48,Color3.fromRGB(60,104,66)},
     }) do
         local neb = Instance.new("Frame")
         neb.AnchorPoint = Vector2.new(0.5,0.5)
@@ -549,7 +540,7 @@ local function showStatusPopup(showSuccess)
         local sz=rng:NextInteger(1,3)
         star.Size=UDim2.fromOffset(sz,sz)
         star.Position=UDim2.new(rng:NextNumber(0.015,0.985),0,rng:NextNumber(0.06,0.94),0)
-        star.BackgroundColor3=(i%9==0) and Color3.fromRGB(205,175,255) or Color3.fromRGB(255,255,255)
+        star.BackgroundColor3=(i%9==0) and Color3.fromRGB(217,119,87) or Color3.fromRGB(238,232,224)
         star.BackgroundTransparency=rng:NextNumber(0.08,0.58)
         star.BorderSizePixel=0
         star.ZIndex=1002
@@ -567,12 +558,12 @@ local function showStatusPopup(showSuccess)
     title.Position=UDim2.new(0.5,0,0.5,-5)
     title.Size=UDim2.new(1,-30,0,36)
     title.BackgroundTransparency=1
-    title.Text="DRAKOZZ V3 LOADING"
-    title.TextColor3=Color3.fromRGB(255,255,255)
-    title.TextStrokeColor3=Color3.fromRGB(130,65,255)
+    title.Text="[ claude.xyz ] BOOTING..."
+    title.TextColor3=Color3.fromRGB(238,232,224)
+    title.TextStrokeColor3=Color3.fromRGB(217,119,87)
     title.TextStrokeTransparency=0.3
     title.TextSize=22
-    title.Font=Enum.Font.GothamBold
+    title.FontFace=Bold
     title.TextXAlignment=Enum.TextXAlignment.Center
     title.ZIndex=1003
     title.Parent=popup
@@ -582,10 +573,10 @@ local function showStatusPopup(showSuccess)
     sub.Position=UDim2.new(0.5,0,0.5,17)
     sub.Size=UDim2.new(1,-30,0,18)
     sub.BackgroundTransparency=1
-    sub.Text="GALAXY SYSTEM INITIALIZING • V3"
-    sub.TextColor3=Color3.fromRGB(202,182,255)
+    sub.Text="CONSOLE EDITION • V1.0"
+    sub.TextColor3=Color3.fromRGB(160,148,138)
     sub.TextSize=10
-    sub.Font=Enum.Font.GothamSemibold
+    sub.FontFace=Reg
     sub.TextXAlignment=Enum.TextXAlignment.Center
     sub.ZIndex=1003
     sub.Parent=popup
@@ -595,10 +586,10 @@ local function showStatusPopup(showSuccess)
     if showSuccess then
         task.delay(1.25,function()
             if not popup.Parent then return end
-            title.Text="DRAKOZZ V3 SUCCSESSFULLY LOADED"
-            sub.Text="ALL SYSTEMS READY • DRAKOZZ HUB V3"
-            title.TextColor3=Color3.fromRGB(238,230,255)
-            Strk(popup,Color3.fromRGB(100,180,255),1.8,0.02)
+            title.Text="> claude.xyz online"
+            sub.Text="ALL SYSTEMS READY"
+            title.TextColor3=Color3.fromRGB(110,196,140)
+            Strk(popup,Color3.fromRGB(110,196,140),1.8,0.02)
         end)
     end
 
@@ -621,26 +612,26 @@ if NEEDS_KEY then
     -- After a valid key, show the success state at the top again.
     pcall(function()
         local popup = Instance.new("Frame")
-        popup.Name = "DRAKOZZ_SuccessPopup"
+        popup.Name = "CLAUDE_SuccessPopup"
         popup.AnchorPoint = Vector2.new(0.5,0)
         popup.Position = UDim2.new(0.5,0,0,-110)
         popup.Size = UDim2.new(0,500,0,88)
-        popup.BackgroundColor3 = Color3.fromRGB(7,5,24)
+        popup.BackgroundColor3 = Color3.fromRGB(12,10,9)
         popup.BorderSizePixel = 0
         popup.ZIndex = 10000
         popup.Parent = GUI
         Cnr(popup,16)
-        Strk(popup,Color3.fromRGB(105,190,255),1.8,0.03)
+        Strk(popup,Color3.fromRGB(110,196,140),1.8,0.03)
         local g=Instance.new("UIGradient",popup)
-        g.Color=ColorSequence.new(Color3.fromRGB(18,8,55),Color3.fromRGB(12,38,105))
+        g.Color=ColorSequence.new(Color3.fromRGB(26,20,16),Color3.fromRGB(18,30,24))
         g.Rotation=15
         for i=1,45 do
             local st=Instance.new("Frame",popup)
-            local sz=rng and 2 or 2
+            local sz=math.random(1,2)
             st.Size=UDim2.fromOffset(sz,sz)
             st.Position=UDim2.new(math.random(),0,math.random(),0)
-            st.BackgroundColor3=Color3.fromRGB(255,255,255)
-            st.BackgroundTransparency=math.random(15,65)/100
+            st.BackgroundColor3=Color3.fromRGB(238,232,224)
+            st.BackgroundTransparency=math.random(45,80)/100
             st.BorderSizePixel=0
             st.ZIndex=10001
             Cnr(st,4)
@@ -649,12 +640,12 @@ if NEEDS_KEY then
         ttl.BackgroundTransparency=1
         ttl.Size=UDim2.new(1,-24,1,0)
         ttl.Position=UDim2.new(0,12,0,0)
-        ttl.Text="DRAKOZZ V3 SUCCSESSFULLY LOADED"
-        ttl.TextColor3=Color3.fromRGB(245,240,255)
-        ttl.TextStrokeColor3=Color3.fromRGB(120,180,255)
+        ttl.Text="> claude.xyz online — key accepted"
+        ttl.TextColor3=Color3.fromRGB(110,196,140)
+        ttl.TextStrokeColor3=Color3.fromRGB(18,40,26)
         ttl.TextStrokeTransparency=0.35
         ttl.TextSize=20
-        ttl.Font=Enum.Font.GothamBold
+        ttl.FontFace=Bold
         ttl.TextXAlignment=Enum.TextXAlignment.Center
         ttl.ZIndex=10002
         Tw(popup,{Position=UDim2.new(0.5,0,0,18)},0.5,Enum.EasingStyle.Quint,Enum.EasingDirection.Out)
@@ -939,46 +930,46 @@ end
 
 -- ════════════════════════════════════════════════════════════
 -- ════════════════════════════════════════════════════════════
--- MAIN WINDOW — GALAXY V3 LAYOUT
+-- MAIN WINDOW — CLAUDE.XYZ CONSOLE LAYOUT
 -- ════════════════════════════════════════════════════════════
 local WW,WH = 900,650
 local Win = Instance.new("Frame",GUI)
-Win.Name="KRX_Main"
+Win.Name="CLX_Main"
 Win.Size=UDim2.new(0,WW,0,WH)
 Win.Position=UDim2.new(0.5,-WW/2,0.5,-WH/2)
-Win.BackgroundColor3=Color3.fromRGB(5,4,18)
+Win.BackgroundColor3=Color3.fromRGB(20,17,14)
 Win.BackgroundTransparency=0.02
 Win.BorderSizePixel=0
 Win.ClipsDescendants=true
 Win.ZIndex=10
 Cnr(Win,18)
-Strk(Win,Color3.fromRGB(120,70,255),1.6,0.12)
+Strk(Win,Color3.fromRGB(217,119,87),1.6,0.12)
 
--- Procedural galaxy background: no external image is required.
+-- Procedural CRT console background: dark clay wash + scanline shimmer.
 local GalaxyBg=Instance.new("Frame",Win)
-GalaxyBg.Name="GalaxyBackground"
+GalaxyBg.Name="ConsoleBackground"
 GalaxyBg.Size=UDim2.fromScale(1,1)
-GalaxyBg.BackgroundColor3=Color3.fromRGB(5,4,24)
+GalaxyBg.BackgroundColor3=Color3.fromRGB(12,10,9)
 GalaxyBg.BorderSizePixel=0
 GalaxyBg.ZIndex=10
 Cnr(GalaxyBg,18)
 
 local galaxyGrad=Instance.new("UIGradient",GalaxyBg)
 galaxyGrad.Color=ColorSequence.new({
-    ColorSequenceKeypoint.new(0,Color3.fromRGB(5,4,25)),
-    ColorSequenceKeypoint.new(0.28,Color3.fromRGB(24,7,55)),
-    ColorSequenceKeypoint.new(0.52,Color3.fromRGB(8,19,62)),
-    ColorSequenceKeypoint.new(0.76,Color3.fromRGB(35,8,70)),
-    ColorSequenceKeypoint.new(1,Color3.fromRGB(3,5,22)),
+    ColorSequenceKeypoint.new(0,Color3.fromRGB(12,10,9)),
+    ColorSequenceKeypoint.new(0.28,Color3.fromRGB(46,28,18)),
+    ColorSequenceKeypoint.new(0.52,Color3.fromRGB(26,30,22)),
+    ColorSequenceKeypoint.new(0.76,Color3.fromRGB(50,30,20)),
+    ColorSequenceKeypoint.new(1,Color3.fromRGB(10,9,8)),
 })
 galaxyGrad.Rotation=18
 
--- Nebula clouds.
+-- Warm CRT glow pools (clay + mint).
 for _,d in ipairs({
-    {0.18,0.35,0.52,Color3.fromRGB(125,35,255)},
-    {0.72,0.26,0.48,Color3.fromRGB(40,80,255)},
-    {0.53,0.78,0.58,Color3.fromRGB(90,25,220)},
-    {0.88,0.78,0.42,Color3.fromRGB(30,65,255)},
+    {0.18,0.35,0.52,Color3.fromRGB(140,74,46)},
+    {0.72,0.26,0.48,Color3.fromRGB(66,110,72)},
+    {0.53,0.78,0.58,Color3.fromRGB(110,60,38)},
+    {0.88,0.78,0.42,Color3.fromRGB(58,96,64)},
 }) do
     local neb=Instance.new("Frame",GalaxyBg)
     neb.AnchorPoint=Vector2.new(0.5,0.5)
@@ -991,23 +982,24 @@ for _,d in ipairs({
     Cnr(neb,90)
 end
 
-local starRng=Random.new(314159)
-for i=1,150 do
-    local star=Instance.new("Frame",GalaxyBg)
-    local sz=starRng:NextInteger(1,3)
-    star.Size=UDim2.fromOffset(sz,sz)
-    star.Position=UDim2.new(starRng:NextNumber(0.01,0.99),0,starRng:NextNumber(0.01,0.99),0)
-    star.BackgroundColor3=(i%13==0) and Color3.fromRGB(205,175,255) or Color3.fromRGB(255,255,255)
-    star.BackgroundTransparency=starRng:NextNumber(0.2,0.78)
-    star.BorderSizePixel=0
-    star.ZIndex=11
-    Cnr(star,5)
-    if i%4==0 then
-        task.spawn(function()
-            task.wait(starRng:NextNumber(0,1.5))
-            local tw=TweenSvc:Create(star,TweenInfo.new(starRng:NextNumber(0.7,1.5),Enum.EasingStyle.Sine,Enum.EasingDirection.InOut,-1,true),{BackgroundTransparency=0.9})
-            tw:Play()
-        end)
+-- Scanlines: thin dark lines every few px for the CRT feel.
+local ScanWrap=Instance.new("Frame",GalaxyBg)
+ScanWrap.Size=UDim2.fromScale(1,1)
+ScanWrap.BackgroundTransparency=1
+ScanWrap.BorderSizePixel=0
+ScanWrap.ZIndex=12
+ScanWrap.ClipsDescendants=true
+do
+    local list=Instance.new("UIListLayout",ScanWrap)
+    list.SortOrder=Enum.SortOrder.LayoutOrder
+    list.Padding=UDim.new(0,3)
+    for i=1,math.ceil(WH/4) do
+        local ln=Instance.new("Frame",ScanWrap)
+        ln.BackgroundColor3=Color3.fromRGB(0,0,0)
+        ln.BackgroundTransparency=0.86
+        ln.BorderSizePixel=0
+        ln.Size=UDim2.new(1,0,0,1)
+        ln.ZIndex=12
     end
 end
 
@@ -1025,7 +1017,7 @@ Cnr(WinBg,18)
 
 local Header=Instance.new("Frame",Win)
 Header.Size=UDim2.new(1,0,0,58)
-Header.BackgroundColor3=Color3.fromRGB(5,4,20)
+Header.BackgroundColor3=Color3.fromRGB(22,18,15)
 Header.BackgroundTransparency=0.25
 Header.BorderSizePixel=0
 Header.ZIndex=20
@@ -1033,37 +1025,37 @@ Header.ZIndex=20
 local logo=Instance.new("Frame",Header)
 logo.Size=UDim2.fromOffset(38,38)
 logo.Position=UDim2.new(0,16,0.5,-19)
-logo.BackgroundColor3=Color3.fromRGB(20,10,48)
+logo.BackgroundColor3=Color3.fromRGB(30,22,17)
 logo.BackgroundTransparency=0.05
 logo.BorderSizePixel=0
 Cnr(logo,10)
-Strk(logo,Color3.fromRGB(160,95,255),1.5,0.12)
-MkLabel(logo,{text="D",size=19,color=Color3.fromRGB(220,200,255),font=Bold,sz=UDim2.fromScale(1,1),xa=Enum.TextXAlignment.Center,z=21})
+Strk(logo,Color3.fromRGB(217,119,87),1.5,0.12)
+MkLabel(logo,{text="c",size=19,color=Color3.fromRGB(240,238,230),font=Bold,sz=UDim2.fromScale(1,1),xa=Enum.TextXAlignment.Center,z=21})
 
-local TitleLbl=MkLabel(Header,{text="DRAKOZZ HUB V3",size=17,color=Color3.fromRGB(245,240,255),font=Bold,sz=UDim2.new(0,240,0,24),pos=UDim2.new(0,64,0,9),z=21})
-MkLabel(Header,{text="GALAXY EDITION • V3",size=8,color=Color3.fromRGB(180,155,255),font=Semi,sz=UDim2.new(0,240,0,12),pos=UDim2.new(0,64,0,34),z=21})
+local TitleLbl=MkLabel(Header,{text="CLAUDE.XYZ",size=17,color=Color3.fromRGB(240,238,230),font=Bold,sz=UDim2.new(0,240,0,24),pos=UDim2.new(0,64,0,9),z=21})
+MkLabel(Header,{text="CONSOLE EDITION • V1.0",size=8,color=Color3.fromRGB(217,150,120),font=Semi,sz=UDim2.new(0,240,0,12),pos=UDim2.new(0,64,0,34),z=21})
 
 local CloseBtn=Instance.new("TextButton",Header)
 CloseBtn.Size=UDim2.fromOffset(32,32)
 CloseBtn.Position=UDim2.new(1,-48,0.5,-16)
-CloseBtn.BackgroundColor3=Color3.fromRGB(25,17,45)
+CloseBtn.BackgroundColor3=Color3.fromRGB(35,26,21)
 CloseBtn.BackgroundTransparency=0.12
 CloseBtn.Text="×"
 CloseBtn.FontFace=Bold
 CloseBtn.TextSize=18
-CloseBtn.TextColor3=Color3.fromRGB(205,190,230)
+CloseBtn.TextColor3=Color3.fromRGB(220,210,200)
 CloseBtn.AutoButtonColor=false
 CloseBtn.BorderSizePixel=0
 CloseBtn.ZIndex=22
 Cnr(CloseBtn,9)
-CloseBtn.MouseEnter:Connect(function() Tw(CloseBtn,{BackgroundColor3=Color3.fromRGB(150,55,100),TextColor3=Color3.fromRGB(255,255,255)},0.14) end)
-CloseBtn.MouseLeave:Connect(function() Tw(CloseBtn,{BackgroundColor3=Color3.fromRGB(25,17,45),TextColor3=Color3.fromRGB(205,190,230)},0.14) end)
+CloseBtn.MouseEnter:Connect(function() Tw(CloseBtn,{BackgroundColor3=Color3.fromRGB(217,119,87),TextColor3=Color3.fromRGB(255,255,255)},0.14) end)
+CloseBtn.MouseLeave:Connect(function() Tw(CloseBtn,{BackgroundColor3=Color3.fromRGB(35,26,21),TextColor3=Color3.fromRGB(220,210,200)},0.14) end)
 CloseBtn.MouseButton1Click:Connect(function() Win.Visible=false end)
 
 local HDiv=Instance.new("Frame",Win)
 HDiv.Size=UDim2.new(1,0,0,1)
 HDiv.Position=UDim2.new(0,0,0,58)
-HDiv.BackgroundColor3=Color3.fromRGB(120,70,255)
+HDiv.BackgroundColor3=Color3.fromRGB(217,119,87)
 HDiv.BackgroundTransparency=0.55
 HDiv.BorderSizePixel=0
 HDiv.ZIndex=21
@@ -1095,30 +1087,30 @@ local BODY_Y=59
 local Content=Instance.new("Frame",Win)
 Content.Size=UDim2.new(1,-28,1,-BODY_Y-NAV_H-8)
 Content.Position=UDim2.new(0,14,0,BODY_Y+4)
-Content.BackgroundColor3=Color3.fromRGB(4,3,18)
+Content.BackgroundColor3=Color3.fromRGB(18,15,12)
 Content.BackgroundTransparency=0.48
 Content.BorderSizePixel=0
 Content.ClipsDescendants=true
 Content.ZIndex=15
 Cnr(Content,15)
-Strk(Content,Color3.fromRGB(105,62,220),1.2,0.55)
+Strk(Content,Color3.fromRGB(140,90,70),1.2,0.55)
 
 local BottomNav=Instance.new("ScrollingFrame",Win)
 BottomNav.Name="BottomNavigation"
 BottomNav.Size=UDim2.new(1,-28,0,NAV_H)
 BottomNav.Position=UDim2.new(0,14,1,-NAV_H-10)
-BottomNav.BackgroundColor3=Color3.fromRGB(5,4,23)
+BottomNav.BackgroundColor3=Color3.fromRGB(22,18,15)
 BottomNav.BackgroundTransparency=0.18
 BottomNav.BorderSizePixel=0
 BottomNav.ScrollBarThickness=3
-BottomNav.ScrollBarImageColor3=Color3.fromRGB(145,90,255)
+BottomNav.ScrollBarImageColor3=Color3.fromRGB(190,120,85)
 BottomNav.AutomaticCanvasSize=Enum.AutomaticSize.X
 BottomNav.CanvasSize=UDim2.new(0,0,0,0)
 BottomNav.ScrollingDirection=Enum.ScrollingDirection.X
 BottomNav.ClipsDescendants=true
 BottomNav.ZIndex=20
 Cnr(BottomNav,14)
-Strk(BottomNav,Color3.fromRGB(110,65,235),1.2,0.45)
+Strk(BottomNav,Color3.fromRGB(150,95,75),1.2,0.45)
 LP(BottomNav,8,8,8,8)
 LL(BottomNav,7,Enum.FillDirection.Horizontal)
 
@@ -1149,7 +1141,7 @@ local tabBtns={}; local tabPanels={}; local activeTab=nil; local transiting=fals
 for i,t in ipairs(TABS) do
     local btn=Instance.new("TextButton",BottomNav)
     btn.Size=UDim2.fromOffset(94,50)
-    btn.BackgroundColor3=Color3.fromRGB(18,10,42)
+    btn.BackgroundColor3=Color3.fromRGB(28,22,17)
     btn.BackgroundTransparency=1
     btn.Text=""
     btn.AutoButtonColor=false
@@ -1161,7 +1153,7 @@ for i,t in ipairs(TABS) do
     local bar=Instance.new("Frame",btn)
     bar.Size=UDim2.new(1,-22,0,2)
     bar.Position=UDim2.new(0,11,1,-4)
-    bar.BackgroundColor3=Color3.fromRGB(160,95,255)
+    bar.BackgroundColor3=Color3.fromRGB(217,119,87)
     bar.BackgroundTransparency=1
     bar.BorderSizePixel=0
     bar.ZIndex=22
@@ -1173,7 +1165,7 @@ for i,t in ipairs(TABS) do
     ic.BackgroundTransparency=1
     ic.Text=t.i
     ic.TextSize=17
-    ic.TextColor3=Color3.fromRGB(150,135,185)
+    ic.TextColor3=Color3.fromRGB(175,165,155)
     ic.FontFace=Bold
     ic.TextXAlignment=Enum.TextXAlignment.Center
     ic.ZIndex=22
@@ -1184,7 +1176,7 @@ for i,t in ipairs(TABS) do
     nl.BackgroundTransparency=1
     nl.Text=t.n:upper()
     nl.TextSize=7
-    nl.TextColor3=Color3.fromRGB(145,130,175)
+    nl.TextColor3=Color3.fromRGB(158,148,138)
     nl.FontFace=Bold
     nl.TextXAlignment=Enum.TextXAlignment.Center
     nl.TextTruncate=Enum.TextTruncate.AtEnd
@@ -1196,7 +1188,7 @@ for i,t in ipairs(TABS) do
     panel.BackgroundTransparency=1
     panel.BorderSizePixel=0
     panel.ScrollBarThickness=4
-    panel.ScrollBarImageColor3=Color3.fromRGB(150,90,255)
+    panel.ScrollBarImageColor3=Color3.fromRGB(190,130,95)
     panel.AutomaticCanvasSize=Enum.AutomaticSize.Y
     panel.CanvasSize=UDim2.new(0,0,0,0)
     panel.ClipsDescendants=true
@@ -1224,9 +1216,9 @@ local function GoTab(idx)
 
     for i,tb in ipairs(tabBtns) do
         local a=(i==idx)
-        Tw(tb.btn,{BackgroundTransparency=a and 0.08 or 1,BackgroundColor3=a and Color3.fromRGB(35,17,72) or Color3.fromRGB(18,10,42)},0.16)
-        Tw(tb.nl,{TextColor3=a and Color3.fromRGB(245,240,255) or Color3.fromRGB(145,130,175)},0.16)
-        Tw(tb.ic,{TextColor3=a and Color3.fromRGB(190,150,255) or Color3.fromRGB(150,135,185)},0.16)
+        Tw(tb.btn,{BackgroundTransparency=a and 0.08 or 1,BackgroundColor3=a and Color3.fromRGB(60,42,30) or Color3.fromRGB(28,22,17)},0.16)
+        Tw(tb.nl,{TextColor3=a and Color3.fromRGB(240,238,230) or Color3.fromRGB(158,148,138)},0.16)
+        Tw(tb.ic,{TextColor3=a and Color3.fromRGB(230,160,120) or Color3.fromRGB(175,165,155)},0.16)
         Tw(tb.bar,{BackgroundTransparency=a and 0 or 1},0.2)
     end
 
@@ -1331,7 +1323,7 @@ do
         return ""
     end
 
-    -- The first/default theme "." keeps the original KRX background.
+    -- The first/default theme "." keeps the original claude.xyz console background.
     local THEME_DATA = {
         {
             key=".",
@@ -1805,9 +1797,9 @@ end
 -- TOGGLE BUTTON
 -- ════════════════════════════════════════════════════════════
 local TBtn=Instance.new("TextButton",GUI)
-TBtn.Name="KRX_Toggle"; TBtn.Size=UDim2.fromOffset(52,52)
+TBtn.Name="CLX_Toggle"; TBtn.Size=UDim2.fromOffset(52,52)
 TBtn.BackgroundColor3=T.BG; TBtn.BackgroundTransparency=0.02
-TBtn.Text="V"; TBtn.FontFace=Bold; TBtn.TextSize=18; TBtn.TextColor3=T.ACCENT
+TBtn.Text="c"; TBtn.FontFace=Bold; TBtn.TextSize=18; TBtn.TextColor3=T.ACCENT
 TBtn.AutoButtonColor=false; TBtn.BorderSizePixel=0; TBtn.ZIndex=200
 Cnr(TBtn,12); Strk(TBtn,T.ACCENT,1.8,0.2)
 
@@ -1816,7 +1808,11 @@ task.defer(function() local gs=GUI.AbsoluteSize; TBtn.Position=UDim2.fromOffset(
 local toggleHue=0
 TC(RunSvc.RenderStepped:Connect(function(dt)
     toggleHue=(toggleHue+dt*0.4)%1
-    TBtn.TextColor3=Color3.fromHSV(toggleHue,0.9,1)
+    if toggleHue < 0.5 then
+        TBtn.TextColor3=T.ACCENT
+    else
+        TBtn.TextColor3=Color3.fromRGB(238,190,150)
+    end
 end))
 
 local _toggleKey=Enum.KeyCode.Insert
@@ -1934,8 +1930,7 @@ do
     local P=tabPanels[1]
     local wc=MkCard(P,76,1)
     MkLabel(wc,{text="Welcome back",size=9,color=T.MUTED,font=Reg,sz=UDim2.new(1,-32,0,14),pos=UDim2.new(0,16,0,10),z=14})
-    local wnL=MkLabel(wc,{text=lp.DisplayName,size=22,color=T.TEXT,font=Bold,sz=UDim2.new(1,-32,0,30),pos=UDim2.new(0,16,0,26),z=14})
-    local wnH=0; TC(RunSvc.Heartbeat:Connect(function(dt) wnH=(wnH+dt*0.5)%1; wnL.TextColor3=Color3.fromHSV(wnH,1,1) end))
+    local wnL=MkLabel(wc,{text=lp.DisplayName,size=22,color=T.ACCENT,font=Bold,sz=UDim2.new(1,-32,0,30),pos=UDim2.new(0,16,0,26),z=14})
     MkLabel(wc,{text="@"..lp.Name.." · ID: "..lp.UserId,size=8,color=T.DIM,font=Reg,sz=UDim2.new(1,-32,0,12),pos=UDim2.new(0,16,0,58),z=14})
     
     local sc=MkCard(P,42,2)
@@ -1943,12 +1938,12 @@ do
     
     local ulCard=MkCard(P,48,3)
     MkLabel(ulCard,{text="UNLOAD ENGINE",size=8,color=T.DIM,font=Bold,sz=UDim2.new(1,-32,0,12),pos=UDim2.new(0,16,0,8),z=14})
-    local ulBtn=MkBtn(ulCard,{bg=T.ERR,text="UNLOAD KRX",size=10,color=T.TEXT,sz=UDim2.new(1,-32,0,26),pos=UDim2.new(0,16,0,20),corner=7,bgt=0.1,z=15})
+    local ulBtn=MkBtn(ulCard,{bg=T.ERR,text="UNLOAD CLAUDE",size=10,color=T.TEXT,sz=UDim2.new(1,-32,0,26),pos=UDim2.new(0,16,0,20),corner=7,bgt=0.1,z=15})
     local ulC=false
     ulBtn.MouseButton1Click:Connect(function()
         if not ulC then
             ulC=true; ulBtn.Text="CLICK AGAIN TO CONFIRM"
-            task.delay(3,function() ulC=false; ulBtn.Text="UNLOAD KRX" end)
+            task.delay(3,function() ulC=false; ulBtn.Text="UNLOAD CLAUDE" end)
         else
             for _,c in ipairs(CONNS) do pcall(function() c:Disconnect() end) end
             DoSave(); Notif("Unload","Goodbye!","warn")
@@ -2216,8 +2211,8 @@ do
         end
     )
 
-    -- Public wrapper used by the DRAKOZZ radial circle.
-    _G.KRX_SetKillAura = function(state)
+    -- Public wrapper used by the CLAUDE radial circle.
+    _G.CLX_SetKillAura = function(state)
         state = state == true
         kaOn = state
         kSet(state)
@@ -2232,12 +2227,12 @@ do
 
     RegKB("Kill Aura",Enum.KeyCode.K,function()
         kaOn = not kaOn
-        _G.KRX_KillAuraOn = kaOn
+        _G.CLX_KillAuraOn = kaOn
         kSet(kaOn)
         if kaOn then StartKA(); Notif("Kill Aura","Active","ok") else StopKA(); Notif("Kill Aura","Off","") end
     end)
 
-    _G.KRX_KillAuraOn = kaOn
+    _G.CLX_KillAuraOn = kaOn
 
     MkToggle(P,"SIMULTANEOUS HITS",4,function() kaSimul=true; Notif("Kill Aura","Simultaneous: ON","ok") end,function() kaSimul=false; Notif("Kill Aura","Simultaneous: OFF","") end)
     
@@ -2876,7 +2871,7 @@ do
             local t=line:match("^%s*(.-)%s*$")
             if t~="" then insert(_userPhrases,t) end
         end
-        if #_userPhrases==0 then insert(_userPhrases,"daddy hxunted") end
+        if #_userPhrases==0 then insert(_userPhrases,"claude.xyz console") end
     end
     parseUserPhrases(SAVE.phrases)
     
@@ -2996,7 +2991,7 @@ do
     cR = colors[math.random(1, #colors)]
         cB = colors[math.random(1, #colors)]
     cR = colors[math.random(1, #colors)]
-elseif rpMode == "DRAKOZZ" then
+elseif rpMode == "CLAUDE" then
     local colors = {
         Color3.fromRGB(0, 0, 0),   -- red
         Color3.fromRGB(117,117,117),   -- blue
@@ -3004,7 +2999,7 @@ elseif rpMode == "DRAKOZZ" then
     }
     cB = colors[math.random(1, #colors)]
     cR = colors[math.random(1, #colors)]
-    elseif rpMode == "DRXKOZZ" then
+    elseif rpMode == "clay" then
     local colors = {
         Color3.fromRGB(248,248,255),   -- red
         Color3.fromRGB(128,128,128),   -- blue
@@ -3092,8 +3087,8 @@ elseif rpMode == "DRAKOZZ" then
     local modeCard=MkCard(P,158,3)
     MkLabel(modeCard,{text="COLOR MODE",size=7,color=T.DIM,font=Bold,sz=UDim2.new(1,-28,0,10),pos=UDim2.new(0,14,0,7),z=14})
     
-    local modes={"R+B+R","sky blue","DRAKOZZ","DRXKOZZ","R+R+R","W+W+W","G+G+G","B+B+B","fire horn","ice horn","tox horn"}
-    local modeKeys={"R+B+R","sky blue","DRAKOZZ","DRXKOZZ","R+R+R","www","ggg","bbb","horn","horn1","horn2"}
+    local modes={"R+B+R","sky blue","CLAUDE","clay","R+R+R","W+W+W","G+G+G","B+B+B","fire horn","ice horn","tox horn"}
+    local modeKeys={"R+B+R","sky blue","CLAUDE","clay","R+R+R","www","ggg","bbb","horn","horn1","horn2"}
     
     local mRows={}
     for r=1,5 do
@@ -3162,14 +3157,14 @@ end
 do
     local P=tabPanels[4]
     
-    _G.KRX_tpwOn=false; _G.KRX_tpwSpd=SAVE.tpwSpeed; local tpwConn
+    _G.CLX_tpwOn=false; _G.CLX_tpwSpd=SAVE.tpwSpeed; local tpwConn
 
     -- Instant TP WALK: uses the player's current MoveDirection every frame
     -- with no direction smoothing or artificial wait/delay.
     local function startTPW()
         if tpwConn then tpwConn:Disconnect() end
         tpwConn=TC(RunSvc.RenderStepped:Connect(function(dt)
-            if not _G.KRX_tpwOn then return end
+            if not _G.CLX_tpwOn then return end
             local ch=lp.Character; if not ch then return end
             local hrp=ch:FindFirstChild("HumanoidRootPart")
             local hum=ch:FindFirstChildWhichIsA("Humanoid")
@@ -3178,7 +3173,7 @@ do
             local md=hum.MoveDirection
             if md.Magnitude<=0.01 then return end
 
-            local speed=math.max(0,tonumber(_G.KRX_tpwSpd) or 0)
+            local speed=math.max(0,tonumber(_G.CLX_tpwSpd) or 0)
             local step=md.Unit*speed*dt*10
             pcall(function()
                 ch:TranslateBy(step)
@@ -3187,13 +3182,13 @@ do
     end
 
     local _,_,tpwSet=MkToggle(P,"TPWALK",1,
-        function() _G.KRX_tpwOn=true; startTPW(); Notif("TPWalk","Active","ok") end,
-        function() _G.KRX_tpwOn=false; if tpwConn then tpwConn:Disconnect();tpwConn=nil end; Notif("TPWalk","Off","") end)
+        function() _G.CLX_tpwOn=true; startTPW(); Notif("TPWalk","Active","ok") end,
+        function() _G.CLX_tpwOn=false; if tpwConn then tpwConn:Disconnect();tpwConn=nil end; Notif("TPWalk","Off","") end)
 
-    -- Public wrapper used by the DRAKOZZ radial circle.
-    _G.KRX_SetTPWalk = function(state)
+    -- Public wrapper used by the CLAUDE radial circle.
+    _G.CLX_SetTPWalk = function(state)
         state = state == true
-        _G.KRX_tpwOn = state
+        _G.CLX_tpwOn = state
         tpwSet(state)
         if state then
             startTPW()
@@ -3208,21 +3203,21 @@ do
     end
 
     RegKB("TPWalk",Enum.KeyCode.T,function()
-        _G.KRX_tpwOn=not _G.KRX_tpwOn; tpwSet(_G.KRX_tpwOn)
-        if _G.KRX_tpwOn then startTPW(); Notif("TPWalk","Active","ok") else if tpwConn then tpwConn:Disconnect();tpwConn=nil end; Notif("TPWalk","Off","") end
+        _G.CLX_tpwOn=not _G.CLX_tpwOn; tpwSet(_G.CLX_tpwOn)
+        if _G.CLX_tpwOn then startTPW(); Notif("TPWalk","Active","ok") else if tpwConn then tpwConn:Disconnect();tpwConn=nil end; Notif("TPWalk","Off","") end
     end)
     
-    MkSlider(P,"TPWALK SPEED",1,80,SAVE.tpwSpeed,2,function(v) _G.KRX_tpwSpd=v; SAVE.tpwSpeed=v; task.delay(.5,DoSave) end)
+    MkSlider(P,"TPWALK SPEED",1,80,SAVE.tpwSpeed,2,function(v) _G.CLX_tpwSpd=v; SAVE.tpwSpeed=v; task.delay(.5,DoSave) end)
     
-    _G.KRX_flyOn=false; _G.KRX_flySpd=SAVE.flySpeed; local flyConn; local fbv,fbg
+    _G.CLX_flyOn=false; _G.CLX_flySpd=SAVE.flySpeed; local flyConn; local fbv,fbg
     local function startFly()
         local char=lp.Character; if not char then return end
         local hrp=char:FindFirstChild("HumanoidRootPart"); if not hrp then return end
         local hum=char:FindFirstChildOfClass("Humanoid"); if hum then hum.PlatformStand=true end
         fbv=Instance.new("BodyVelocity",hrp); fbv.MaxForce=Vector3.new(1e5,1e5,1e5); fbv.Velocity=Vector3.zero
-        fbg=Instance.new("BodyGyro",hrp); fbg.MaxTorque=Vector3.new(1e5,1e5,1e5); fbg.D=150; _G.KRX_flyOn=true
+        fbg=Instance.new("BodyGyro",hrp); fbg.MaxTorque=Vector3.new(1e5,1e5,1e5); fbg.D=150; _G.CLX_flyOn=true
         flyConn=TC(RunSvc.RenderStepped:Connect(function()
-            if not _G.KRX_flyOn then return end
+            if not _G.CLX_flyOn then return end
             local c=workspace.CurrentCamera; if not c then return end; local v=Vector3.zero
             if UIS:IsKeyDown(Enum.KeyCode.W) then v=v+c.CFrame.LookVector end
             if UIS:IsKeyDown(Enum.KeyCode.S) then v=v-c.CFrame.LookVector end
@@ -3230,13 +3225,13 @@ do
             if UIS:IsKeyDown(Enum.KeyCode.D) then v=v+c.CFrame.RightVector end
             if UIS:IsKeyDown(Enum.KeyCode.Space) then v=v+Vector3.new(0,1,0) end
             if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then v=v-Vector3.new(0,1,0) end
-            if v.Magnitude>0 then v=v.Unit*_G.KRX_flySpd end
+            if v.Magnitude>0 then v=v.Unit*_G.CLX_flySpd end
             if fbv and fbv.Parent then fbv.Velocity=v end
             if fbg and fbg.Parent then fbg.CFrame=c.CFrame end
         end))
     end
     local function stopFly()
-        _G.KRX_flyOn=false; if flyConn then flyConn:Disconnect();flyConn=nil end
+        _G.CLX_flyOn=false; if flyConn then flyConn:Disconnect();flyConn=nil end
         pcall(function() if fbv then fbv:Destroy() end end)
         pcall(function() if fbg then fbg:Destroy() end end)
         pcall(function() lp.Character:FindFirstChildOfClass("Humanoid").PlatformStand=false end)
@@ -3246,7 +3241,7 @@ do
         function() startFly(); Notif("Fly","Active","ok") end,
         function() stopFly(); Notif("Fly","Off","") end)
     
-    MkSlider(P,"FLY SPEED",1,300,SAVE.flySpeed,4,function(v) _G.KRX_flySpd=v; SAVE.flySpeed=v; task.delay(.5,DoSave) end)
+    MkSlider(P,"FLY SPEED",1,300,SAVE.flySpeed,4,function(v) _G.CLX_flySpd=v; SAVE.flySpeed=v; task.delay(.5,DoSave) end)
     MkSlider(P,"WALK SPEED",1,500,16,5,function(v) pcall(function() lp.Character:FindFirstChildOfClass("Humanoid").WalkSpeed=v end) end)
     MkSlider(P,"JUMP POWER",1,500,50,6,function(v) pcall(function() local h=lp.Character:FindFirstChildOfClass("Humanoid"); h.UseJumpPower=true; h.JumpPower=v end) end)
     MkSlider(P,"GRAVITY",1,600,196,7,function(v) pcall(function() workspace.Gravity=v end) end)
@@ -3381,10 +3376,10 @@ end
         local Players = game:GetService("Players")
         local lp = Players.LocalPlayer
 
-        _G.KRX_flyOn = _G.KRX_flyOn or false
-        _G.KRX_flySpd = _G.KRX_flySpd or 50
-        _G.KRX_tpwOn = _G.KRX_tpwOn or false
-        _G.KRX_tpwSpd = _G.KRX_tpwSpd or 50
+        _G.CLX_flyOn = _G.CLX_flyOn or false
+        _G.CLX_flySpd = _G.CLX_flySpd or 50
+        _G.CLX_tpwOn = _G.CLX_tpwOn or false
+        _G.CLX_tpwSpd = _G.CLX_tpwSpd or 50
 
         local ghostPlatform = Instance.new("Part")
         ghostPlatform.Name = "GhostPlatform"
@@ -3631,8 +3626,8 @@ end
                     cloneHum.Jump = true
                 end
 
-                local isFlying = _G.KRX_flyOn
-                local isTPW = _G.KRX_tpwOn
+                local isFlying = _G.CLX_flyOn
+                local isTPW = _G.CLX_tpwOn
 
                 if isFlying then
                     cloneHum.PlatformStand = true
@@ -3644,7 +3639,7 @@ end
                     if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then fly -= Vector3.new(0, 1, 0) end
 
                     if fly.Magnitude > 0 then
-                        bv.Velocity = fly.Unit * _G.KRX_flySpd
+                        bv.Velocity = fly.Unit * _G.CLX_flySpd
                     else
                         bv.Velocity = Vector3.zero
                     end
@@ -3655,7 +3650,7 @@ end
                     bg.Parent = nil
                     local md = cloneHum.MoveDirection
                     if md.Magnitude > 0 then
-                        clone:TranslateBy(md.Unit * _G.KRX_tpwSpd * dt * 12)
+                        clone:TranslateBy(md.Unit * _G.CLX_tpwSpd * dt * 12)
                     end
                 else
                     cloneHum.PlatformStand = false
@@ -4229,20 +4224,20 @@ do
         Notif("Invisible", invisOn and ("Ghost Mode: ON" .. (source and " ("..source..")" or "")) or "Ghost Mode: OFF", invisOn and "ok" or "")
     end
 
-    _G.KRX_SetInvisible = function(state, source)
-        _G.KRX_InvisibleOn = state == true
-        setInvisible(_G.KRX_InvisibleOn, source)
-        if invisSet then invisSet(_G.KRX_InvisibleOn) end
+    _G.CLX_SetInvisible = function(state, source)
+        _G.CLX_InvisibleOn = state == true
+        setInvisible(_G.CLX_InvisibleOn, source)
+        if invisSet then invisSet(_G.CLX_InvisibleOn) end
     end
-    _G.KRX_InvisibleOn = false
+    _G.CLX_InvisibleOn = false
 
     _,_,invisSet = MkToggle(P,"GHOSTMODE",2,
         function()
-            _G.KRX_InvisibleOn = true
+            _G.CLX_InvisibleOn = true
             setInvisible(true, "Ghost Mode")
         end,
         function()
-            _G.KRX_InvisibleOn = false
+            _G.CLX_InvisibleOn = false
             setInvisible(false, "Ghost Mode")
         end)
     
@@ -4279,7 +4274,7 @@ do
     
     lp.CharacterAdded:Connect(function(char)
         task.defer(function()
-            if _G.KRX_InvisibleOn == true then
+            if _G.CLX_InvisibleOn == true then
                 task.wait(0.25)
                 setInvisible(true, "Ghost Mode")
             end
@@ -4349,13 +4344,13 @@ do
     end)
 end
 
-print("✓ krx v4 starting...")
+print("claude.xyz console v1 booting...")
 
 Win.Visible=true
 GoTab(1)
 
-print("hxunted.")
-Notif("hxunted.","dc: 4eva.hxunted","gg")
+print("claude.xyz")
+Notif("claude.xyz","console edition v1.0","gg")
 -- ═══════════════════════════════════════
 -- TAB 3: RP COLOR
 -- ═══════════════════════════════════════
@@ -4371,7 +4366,7 @@ do
             local t=line:match("^%s*(.-)%s*$")
             if t~="" then insert(_userPhrases,t) end
         end
-        if #_userPhrases==0 then insert(_userPhrases,"daddy hxunted") end
+        if #_userPhrases==0 then insert(_userPhrases,"claude.xyz console") end
     end
     parseUserPhrases(SAVE.phrases)
     
@@ -4823,7 +4818,7 @@ do
     end
 
     -- PLAYERS INFO uses this same multi-target ESP system.
-    _G.DrakozzXRayPlayer = function(player)
+    _G.ClaudeXRayPlayer = function(player)
         if not player or player == lp or not player.Parent then
             Notif("X-Ray","Select a valid player first","warn")
             return false
@@ -4836,7 +4831,7 @@ do
         return true
     end
 
-    _G.DrakozzXRayRemovePlayer = function(player)
+    _G.ClaudeXRayRemovePlayer = function(player)
         if not player then return false end
         ESPTargets[player] = nil
         if next(ESPTargets) == nil then
@@ -4847,7 +4842,7 @@ do
         return true
     end
 
-    _G.DrakozzXRayIsPlayerOn = function(player)
+    _G.ClaudeXRayIsPlayerOn = function(player)
         return player ~= nil and ESPEnabled and ESPTargets[player] == true
     end
 
@@ -4965,7 +4960,7 @@ end
 
 --[[
  ════════════════════════════════════════════════════════
-   DRAKOZZ KORBLOX + HEADLESS / SPAM GRAB / RESET
+   CLAUDE KORBLOX + HEADLESS / SPAM GRAB / RESET
    Everything in this tab is manual and OFF by default.
  ════════════════════════════════════════════════════════
 --]]
@@ -4999,7 +4994,7 @@ do
     local PURPLE_VALK_ID = 1402432199 -- Violet Valkyrie
     local ICE_VALK_ID = 4390891467 -- Ice Valkyrie
 
-    local drakozzEnabled = false
+    local claudeEnabled = false
     local savedDescription = nil
     local hornsCache = {}
     -- Keep every selected head accessory instead of replacing the previous one.
@@ -5029,7 +5024,7 @@ do
         if not char then return end
         local sid = tostring(id)
         for _, c in ipairs(char:GetChildren()) do
-            if (c:IsA("Accessory") or c:IsA("Hat")) and c:GetAttribute("_drakozzAssetId") == sid then
+            if (c:IsA("Accessory") or c:IsA("Hat")) and c:GetAttribute("_claudeAssetId") == sid then
                 pcall(function() c:Destroy() end)
             end
         end
@@ -5045,7 +5040,7 @@ do
 
         for _, acc in ipairs(char:GetChildren()) do
             if acc:IsA("Accessory") or acc:IsA("Hat") then
-                local sid = acc:GetAttribute("_drakozzAssetId")
+                local sid = acc:GetAttribute("_claudeAssetId")
                 local looksLikeCrown = tostring(sid) == tostring(EIGHT_BIT_CROWN_ID)
                     or acc.Name:lower():find("8.?bit", 1, false)
                     or acc.Name:lower():find("crown", 1, true)
@@ -5071,11 +5066,11 @@ do
         end
     end
 
-    local function removeDrakozzHorns(char)
+    local function removeClaudeHorns(char)
         char = char or LP.Character
         if not char then return end
         for _, c in ipairs(char:GetChildren()) do
-            if (c:IsA("Accessory") or c:IsA("Hat")) and c:GetAttribute("_drakozzHorns") == true then
+            if (c:IsA("Accessory") or c:IsA("Hat")) and c:GetAttribute("_claudeHorns") == true then
                 pcall(function() c:Destroy() end)
             end
         end
@@ -5222,7 +5217,7 @@ do
         if not char or not hum then return false end
         local sid = tostring(id)
         for _, c in ipairs(char:GetChildren()) do
-            if c:IsA("Accessory") and c:GetAttribute("_drakozzAssetId") == sid then
+            if c:IsA("Accessory") and c:GetAttribute("_claudeAssetId") == sid then
                 return true
             end
         end
@@ -5232,9 +5227,9 @@ do
         local added = false
         pcall(function()
             local clone = src:Clone()
-            clone.Name = "DRAKOZZ_" .. tostring(label):gsub("%s+", "_")
-            clone:SetAttribute("_drakozzHorns", true)
-            clone:SetAttribute("_drakozzAssetId", sid)
+            clone.Name = "CLAUDE_" .. tostring(label):gsub("%s+", "_")
+            clone:SetAttribute("_claudeHorns", true)
+            clone:SetAttribute("_claudeAssetId", sid)
             hum:AddAccessory(clone)
             added = true
         end)
@@ -5448,34 +5443,34 @@ do
     end
 
     local function restoreOriginal()
-        removeDrakozzHorns()
+        removeClaudeHorns()
         local hum = getHumanoid()
         if hum and savedDescription then
             pcall(function() hum:ApplyDescription(savedDescription:Clone()) end)
         end
     end
 
-    local function enableDrakozz()
-        if drakozzEnabled then return end
+    local function enableClaude()
+        if claudeEnabled then return end
         if not saveOriginalDescription() then
-            Notif("DRAKOZZ", "Could not save avatar", "err")
+            Notif("CLAUDE", "Could not save avatar", "err")
             return
         end
-        drakozzEnabled = true
+        claudeEnabled = true
         applyHeadNoGlow()
         task.wait(0.15)
         applyKorbloxLeg()
-        Notif("DRAKOZZ", "Korblox + Headless: ON", "ok")
+        Notif("CLAUDE", "Korblox + Headless: ON", "ok")
     end
 
-    local function disableDrakozz()
-        if not drakozzEnabled then return end
-        drakozzEnabled = false
+    local function disableClaude()
+        if not claudeEnabled then return end
+        claudeEnabled = false
         restoreOriginal()
         savedDescription = nil
         selectedHornId = nil
         selectedHornName = nil
-        Notif("DRAKOZZ", "Korblox + Headless: OFF", "")
+        Notif("CLAUDE", "Korblox + Headless: OFF", "")
         if refreshHornButtons then refreshHornButtons() end
     end
 
@@ -5500,12 +5495,12 @@ do
         end
     end
 
-    MkSep(P, "DRAKOZZ", 1)
+    MkSep(P, "CLAUDE", 1)
     -- Two radial menus: one for avatar items and one for utility actions.
     -- The button below opens both; TAB also toggles both.
     local circleOpen = false
     local CircleGui = Instance.new("Frame", GUI)
-    CircleGui.Name = "DrakozzCircleMenu"
+    CircleGui.Name = "ClaudeCircleMenu"
     CircleGui.Size = UDim2.fromOffset(360, 360)
     CircleGui.Position = UDim2.new(0.28, 0, 0.5, 0)
     CircleGui.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -5638,10 +5633,10 @@ do
     end
 
     local function updateCircle()
-        local fullOn = getDrakozzToggleState()
-        local auraOn = _G.KRX_KillAuraOn == true
-        local tpWalkOn = _G.KRX_tpwOn == true
-        local invisibleOn = _G.KRX_InvisibleOn == true
+        local fullOn = getClaudeToggleState()
+        local auraOn = _G.CLX_KillAuraOn == true
+        local tpWalkOn = _G.CLX_tpwOn == true
+        local invisibleOn = _G.CLX_InvisibleOn == true
         CircleStatus.Text = string.format(
             "HEADLESS:%s  •  KORBLOX:%s  •  ACCESSORY:%s",
             "READY",
@@ -5649,7 +5644,7 @@ do
             selectedHornName or "NONE"
         )
         CircleStatus.TextColor3 = selectedHornId and T.ON or T.MUTED
-        local fullButton = CircleButtons.DRAKOZZ
+        local fullButton = CircleButtons.CLAUDE
         if fullButton then
             fullButton.BackgroundColor3 = fullOn and T.ON or T.RAISED
             fullButton.TextColor3 = fullOn and T.BG or T.TEXT
@@ -5664,7 +5659,7 @@ do
 
     -- COMBAT panel: separate from the cosmetic circle so both never show at once.
     local UtilityCircleGui = Instance.new("Frame", GUI)
-    UtilityCircleGui.Name = "DrakozzCombatPanel"
+    UtilityCircleGui.Name = "ClaudeCombatPanel"
     UtilityCircleGui.Size = UDim2.fromOffset(360, 340)
     UtilityCircleGui.Position = UDim2.new(0.28, 0, 0.5, 0)
     UtilityCircleGui.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -5679,9 +5674,9 @@ do
     UtilityCircleBg.BorderSizePixel = 0
     UtilityCircleBg.ZIndex = 7900
     Cnr(UtilityCircleBg, 14)
-    Strk(UtilityCircleBg, Color3.fromRGB(255,255,255), 1, 0.45)
+    Strk(UtilityCircleBg, Color3.fromRGB(217,119,87), 1, 0.45)
 
-    -- Galaxy stars behind the combat buttons.
+    -- Console static motes behind the combat buttons.
     do
         local rng = Random.new(8127)
         for i = 1, 120 do
@@ -5689,9 +5684,9 @@ do
             star.Name = "GalaxyStar" .. i
             star.BackgroundTransparency = 1
             star.Text = (i % 9 == 0) and "✦" or ((i % 3 == 0) and "·" or "*")
-            star.TextColor3 = Color3.fromRGB(255,255,255)
+            star.TextColor3 = Color3.fromRGB(238,232,224)
             star.TextTransparency = rng:NextNumber(0.18, 0.72)
-            star.Font = Enum.Font.GothamBold
+            star.FontFace = Reg
             star.TextSize = rng:NextInteger(7, 14)
             star.Size = UDim2.fromOffset(16, 16)
             star.Position = UDim2.new(rng:NextNumber(0.02, 0.96), 0, rng:NextNumber(0.02, 0.96), 0)
@@ -5700,19 +5695,19 @@ do
     end
 
     MkLabel(UtilityCircleBg, {
-        text="★  COMBAT  ★", size=12, color=Color3.fromRGB(255,255,255), font=Bold,
+        text="> COMBAT CONTROLS", size=12, color=Color3.fromRGB(238,232,224), font=Bold,
         sz=UDim2.new(1, -60, 0, 22), pos=UDim2.new(0, 30, 0, 12),
         xa=Enum.TextXAlignment.Center, z=7904
     })
 
     local UtilityCircleStatus = MkLabel(UtilityCircleBg, {
-        text="ALL OFF", size=7, color=Color3.fromRGB(255,255,255), font=Reg,
+        text="ALL OFF", size=7, color=Color3.fromRGB(96,86,78), font=Reg,
         sz=UDim2.new(1, -80, 0, 14), pos=UDim2.new(0, 40, 1, -25),
         xa=Enum.TextXAlignment.Center, z=7904
     })
 
     local UtilityClose = MkBtn(UtilityCircleBg, {
-        bg=Color3.fromRGB(0,0,0), text="×", size=14, color=Color3.fromRGB(255,255,255),
+        bg=Color3.fromRGB(12,10,9), text="×", size=14, color=Color3.fromRGB(238,232,224),
         sz=UDim2.fromOffset(30, 30), pos=UDim2.new(1, -40, 0, 8),
         corner=8, bgt=0.02, z=7910
     })
@@ -5728,15 +5723,15 @@ do
 
     local function setUtilityButtonText(button, label, on)
         if not button then return end
-        button.Text = "★  " .. label .. "  " .. (on and "ON" or "OFF") .. "  ★"
-        button.TextColor3 = Color3.fromRGB(255,255,255)
+        button.Text = "> " .. label .. " " .. (on and "ON" or "OFF")
+        button.TextColor3 = on and Color3.fromRGB(110,196,140) or Color3.fromRGB(160,148,138)
         button.BackgroundColor3 = Color3.fromRGB(0,0,0)
     end
 
     local function updateUtilityCircle()
-        local invisOn = _G.KRX_InvisibleOn == true
-        local auraOn = _G.KRX_KillAuraOn == true
-        local tpOn = _G.KRX_tpwOn == true
+        local invisOn = _G.CLX_InvisibleOn == true
+        local auraOn = _G.CLX_KillAuraOn == true
+        local tpOn = _G.CLX_tpwOn == true
         setUtilityButtonText(CombatButtons.AuraKill, "AURA KILL", auraOn)
         setUtilityButtonText(CombatButtons.TPWalk, "TP WALK", tpOn)
         setUtilityButtonText(CombatButtons.SpamGrab, "SPAM GRAB", spamGrabOn)
@@ -5804,24 +5799,24 @@ do
             if data.action == "spam" then
                 setSpamGrab(not spamGrabOn, "Combat")
             elseif data.action == "invisible" then
-                local newState = not (_G.KRX_InvisibleOn == true)
-                if _G.KRX_SetInvisible then
-                    _G.KRX_SetInvisible(newState, "Ghost Mode")
+                local newState = not (_G.CLX_InvisibleOn == true)
+                if _G.CLX_SetInvisible then
+                    _G.CLX_SetInvisible(newState, "Ghost Mode")
                 else
                     Notif("Ghost", "Ghost Mode is not ready yet", "warn")
                 end
             elseif data.action == "aura" then
-                local newState = not (_G.KRX_KillAuraOn == true)
-                _G.KRX_KillAuraOn = newState
-                if _G.KRX_SetKillAura then
-                    _G.KRX_SetKillAura(newState)
+                local newState = not (_G.CLX_KillAuraOn == true)
+                _G.CLX_KillAuraOn = newState
+                if _G.CLX_SetKillAura then
+                    _G.CLX_SetKillAura(newState)
                 else
                     Notif("Kill Aura", "Kill Aura is not ready yet", "warn")
                 end
             elseif data.action == "tpwalk" then
-                local newState = not (_G.KRX_tpwOn == true)
-                if _G.KRX_SetTPWalk then
-                    _G.KRX_SetTPWalk(newState)
+                local newState = not (_G.CLX_tpwOn == true)
+                if _G.CLX_SetTPWalk then
+                    _G.CLX_SetTPWalk(newState)
                 else
                     Notif("TPWalk", "TP Walk is not ready yet", "warn")
                 end
@@ -5848,7 +5843,7 @@ do
     -- is a single horizontal card with an image, name and ON/OFF toggle.
     -- The ScrollingFrame handles mouse-wheel/touch scrolling automatically.
     CosmeticsPanelGui = Instance.new("Frame", GUI)
-    CosmeticsPanelGui.Name = "DrakozzCosmeticsPanel"
+    CosmeticsPanelGui.Name = "ClaudeCosmeticsPanel"
     CosmeticsPanelGui.Size = UDim2.fromOffset(380, 470)
     CosmeticsPanelGui.Position = UDim2.new(0.28, 0, 0.5, 0)
     CosmeticsPanelGui.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -6112,7 +6107,7 @@ do
 
     -- Three extra circles that open when HORNS is pressed.
     HornCircleGui = Instance.new("Frame", GUI)
-    HornCircleGui.Name = "DrakozzHornCircleMenu"
+    HornCircleGui.Name = "ClaudeHornCircleMenu"
     HornCircleGui.Size = UDim2.fromOffset(340, 340)
     HornCircleGui.Position = UDim2.new(0.5, 0, 0.5, 0)
     HornCircleGui.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -6197,7 +6192,7 @@ do
     end
 
     FedoraCircleGui = Instance.new("Frame", GUI)
-    FedoraCircleGui.Name = "DrakozzFedoraCircleMenu"
+    FedoraCircleGui.Name = "ClaudeFedoraCircleMenu"
     FedoraCircleGui.Size = UDim2.fromOffset(340, 340)
     FedoraCircleGui.Position = UDim2.new(0.5, 0, 0.5, 0)
     FedoraCircleGui.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -6346,10 +6341,10 @@ do
         CircleButtons[data.name] = b
 
         b.MouseButton1Click:Connect(function()
-            if data.action == "drakozz" then
-                local newState = not getDrakozzToggleState()
-                setDrakozzToggle(newState)
-                if newState then enableDrakozz() else disableDrakozz() end
+            if data.action == "claude" then
+                local newState = not getClaudeToggleState()
+                setClaudeToggle(newState)
+                if newState then enableClaude() else disableClaude() end
             elseif data.action == "crown" then
                 local applied = applyCustomHorn(EIGHT_BIT_CROWN_ID, "8 BIT CROWN")
                 if applied then
@@ -6529,7 +6524,7 @@ do
 
     -- Bottom-left player join/leave feed using both DisplayName and @Username.
     local PlayerEventFeed = Instance.new("Frame", GUI)
-    PlayerEventFeed.Name = "DrakozzPlayerEventFeed"
+    PlayerEventFeed.Name = "ClaudePlayerEventFeed"
     PlayerEventFeed.Size = UDim2.fromOffset(330, 180)
     PlayerEventFeed.Position = UDim2.new(0, 18, 1, -18)
     PlayerEventFeed.AnchorPoint = Vector2.new(0, 1)
@@ -6579,9 +6574,9 @@ do
     end)
 
     LP.CharacterAdded:Connect(function(char)
-        if not drakozzEnabled then return end
+        if not claudeEnabled then return end
         task.wait(1)
-        if not drakozzEnabled then return end
+        if not claudeEnabled then return end
         saveOriginalDescription()
         applyHeadNoGlow()
         task.wait(0.15)
@@ -6771,8 +6766,8 @@ do
 
     local function updateXRayButton()
         local on = false
-        if selectedPlayer and type(_G.DrakozzXRayIsPlayerOn) == "function" then
-            on = _G.DrakozzXRayIsPlayerOn(selectedPlayer)
+        if selectedPlayer and type(_G.ClaudeXRayIsPlayerOn) == "function" then
+            on = _G.ClaudeXRayIsPlayerOn(selectedPlayer)
         end
         xrayBtn.Text = on and "X RAY: ON" or "X RAY: OFF"
     end
@@ -6787,16 +6782,16 @@ do
             return
         end
 
-        local isOn = type(_G.DrakozzXRayIsPlayerOn) == "function"
-            and _G.DrakozzXRayIsPlayerOn(selectedPlayer)
+        local isOn = type(_G.ClaudeXRayIsPlayerOn) == "function"
+            and _G.ClaudeXRayIsPlayerOn(selectedPlayer)
 
         if isOn then
-            if type(_G.DrakozzXRayRemovePlayer) == "function" then
-                _G.DrakozzXRayRemovePlayer(selectedPlayer)
+            if type(_G.ClaudeXRayRemovePlayer) == "function" then
+                _G.ClaudeXRayRemovePlayer(selectedPlayer)
             end
         else
-            if type(_G.DrakozzXRayPlayer) == "function" then
-                _G.DrakozzXRayPlayer(selectedPlayer)
+            if type(_G.ClaudeXRayPlayer) == "function" then
+                _G.ClaudeXRayPlayer(selectedPlayer)
             else
                 Notif("X-Ray","X-Ray is not ready yet","warn")
             end
