@@ -6954,3 +6954,289 @@ do
 
     refreshPlayers()
 end
+
+-- ════════════════════════════════════════════════════════════
+-- GOAT GRAB PANEL
+--[[
+ made by drakozz + n1ght
+]]
+-- Rebuilt for claude.xyz: rate-limited grab cycle, live stats, drag
+-- with saved position, minimize, and safe auto-stop. Toggle key: "5".
+-- ════════════════════════════════════════════════════════════
+do
+    local GOAT_IMAGE = "rbxassetid://101169975526932"
+    local BURST = 5
+    local INTERVAL = 0.08
+
+    local function grabRemote()
+        if RF and RF.Grab then return RF.Grab end
+        return nil
+    end
+
+    local panel = Instance.new("Frame")
+    panel.Name = "CLAUDE_GoatGrab"
+    panel.Size = UDim2.fromOffset(212,170)
+    panel.Position = UDim2.new(0.5,-106,0.12,0)
+    panel.BackgroundColor3 = T.BG
+    panel.BackgroundTransparency = 0.03
+    panel.BorderSizePixel = 0
+    panel.ZIndex = 9000
+    panel.Active = true
+    panel.Parent = GUI
+    Cnr(panel,12)
+    Strk(panel,T.ACCENT,1.6,0.14)
+
+    local savedPos = SAVE.goatPos
+    if type(savedPos)=="table" and #savedPos==4 then
+        panel.Position = UDim2.new(savedPos[1],savedPos[2],savedPos[3],savedPos[4])
+    end
+
+    local bg = Instance.new("ImageLabel")
+    bg.Size = UDim2.fromScale(1,1)
+    bg.BackgroundTransparency = 1
+    bg.Image = GOAT_IMAGE
+    bg.ImageTransparency = 0.55
+    bg.ScaleType = Enum.ScaleType.Stretch
+    bg.ZIndex = 9000
+    bg.Parent = panel
+    Cnr(bg,12)
+
+    local header = Instance.new("Frame")
+    header.Size = UDim2.new(1,0,0,30)
+    header.BackgroundColor3 = T.CARD
+    header.BackgroundTransparency = 0.15
+    header.BorderSizePixel = 0
+    header.ZIndex = 9001
+    header.Parent = panel
+    Cnr(header,12)
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1,-60,1,0)
+    title.Position = UDim2.new(0,10,0,0)
+    title.BackgroundTransparency = 1
+    title.Text = "> nxhgt the goat"
+    title.TextColor3 = T.TEXT
+    title.TextSize = 12
+    title.FontFace = Bold
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.ZIndex = 9002
+    title.Parent = header
+
+    local minBtn = Instance.new("TextButton")
+    minBtn.Size = UDim2.fromOffset(22,22)
+    minBtn.Position = UDim2.new(1,-52,0.5,-11)
+    minBtn.BackgroundColor3 = T.RAISED
+    minBtn.Text = "–"
+    minBtn.TextColor3 = T.TEXT
+    minBtn.TextSize = 14
+    minBtn.FontFace = Bold
+    minBtn.AutoButtonColor = false
+    minBtn.BorderSizePixel = 0
+    minBtn.ZIndex = 9002
+    minBtn.Parent = header
+    Cnr(minBtn,6)
+
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.fromOffset(22,22)
+    closeBtn.Position = UDim2.new(1,-26,0.5,-11)
+    closeBtn.BackgroundColor3 = T.ACCENT
+    closeBtn.Text = "×"
+    closeBtn.TextColor3 = T.BG
+    closeBtn.TextSize = 14
+    closeBtn.FontFace = Bold
+    closeBtn.AutoButtonColor = false
+    closeBtn.BorderSizePixel = 0
+    closeBtn.ZIndex = 9002
+    closeBtn.Parent = header
+    Cnr(closeBtn,6)
+
+    local body = Instance.new("Frame")
+    body.Size = UDim2.new(1,-16,1,-40)
+    body.Position = UDim2.new(0,8,0,34)
+    body.BackgroundTransparency = 1
+    body.ZIndex = 9001
+    body.Parent = panel
+
+    local status = Instance.new("TextLabel")
+    status.Size = UDim2.new(1,0,0,16)
+    status.Position = UDim2.new(0,0,0,0)
+    status.BackgroundTransparency = 1
+    status.Text = "> IDLE — press 5"
+    status.TextColor3 = T.MUTED
+    status.TextSize = 10
+    status.FontFace = Reg
+    status.TextXAlignment = Enum.TextXAlignment.Left
+    status.ZIndex = 9002
+    status.Parent = body
+
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1,0,0,42)
+    btn.Position = UDim2.new(0,0,0,24)
+    btn.BackgroundColor3 = T.ACCENT
+    btn.Text = "> START GRAB (5)"
+    btn.TextColor3 = T.BG
+    btn.TextSize = 14
+    btn.FontFace = Bold
+    btn.AutoButtonColor = false
+    btn.BorderSizePixel = 0
+    btn.ZIndex = 9002
+    btn.Parent = body
+    Cnr(btn,8)
+
+    local stats = Instance.new("TextLabel")
+    stats.Size = UDim2.new(1,0,0,16)
+    stats.Position = UDim2.new(0,0,0,72)
+    stats.BackgroundTransparency = 1
+    stats.Text = "sent 0  ·  0/s"
+    stats.TextColor3 = T.MUTED
+    stats.TextSize = 9
+    stats.FontFace = Reg
+    stats.TextXAlignment = Enum.TextXAlignment.Left
+    stats.ZIndex = 9002
+    stats.Parent = body
+
+    local hint = Instance.new("TextLabel")
+    hint.Size = UDim2.new(1,0,0,16)
+    hint.Position = UDim2.new(0,0,0,90)
+    hint.BackgroundTransparency = 1
+    hint.Text = "nxght on top"
+    hint.TextColor3 = T.DIM
+    hint.TextSize = 9
+    hint.FontFace = Reg
+    hint.TextXAlignment = Enum.TextXAlignment.Left
+    hint.ZIndex = 9002
+    hint.Parent = body
+
+    local running = false
+    local loopThread = nil
+    local sent = 0
+    local rateCount = 0
+    local rateWindow = 0
+    local currentRate = 0
+
+    local function refreshStats()
+        stats.Text = string.format("sent %d  ·  %d/s",sent,currentRate)
+    end
+
+    local function stopGrab(reason)
+        running = false
+        btn.Text = "> START GRAB (5)"
+        btn.BackgroundColor3 = T.ACCENT
+        status.Text = "> IDLE — press 5"
+        status.TextColor3 = T.MUTED
+        if reason then Notif("GOAT GRAB",reason,"") end
+    end
+
+    local function startLoop()
+        if not grabRemote() then
+            running = false
+            status.Text = "> GRAB REMOTE NOT FOUND"
+            status.TextColor3 = T.ERR
+            return
+        end
+        if loopThread then return end
+        loopThread = task.spawn(function()
+            while running do
+                local r = grabRemote()
+                if not r then
+                    stopGrab("Remote lost")
+                    break
+                end
+                for _=1,BURST do
+                    if not running then break end
+                    pcall(function() r:InvokeServer() end)
+                    sent += 1
+                    rateCount += 1
+                end
+                task.wait(INTERVAL)
+            end
+            loopThread = nil
+        end)
+    end
+
+    local function setState(on,reason)
+        if on == running then return end
+        if on then
+            running = true
+            btn.Text = "> GRABBING… (5)"
+            btn.BackgroundColor3 = T.ON
+            status.Text = "> ACTIVE — nxght on top"
+            status.TextColor3 = T.ON
+            startLoop()
+            if running then Notif("GOAT GRAB","Active","ok") end
+        else
+            stopGrab(reason or "Off")
+        end
+    end
+
+    local function toggle()
+        setState(not running)
+    end
+
+    btn.MouseButton1Click:Connect(toggle)
+
+    TC(UIS.InputBegan:Connect(function(input,gp)
+        if gp then return end
+        if input.KeyCode ~= Enum.KeyCode.Five then return end
+        if UIS:GetFocusedTextBox() then return end
+        toggle()
+    end))
+
+    TC(RunSvc.Heartbeat:Connect(function(dt)
+        rateWindow += dt
+        if rateWindow >= 1 then
+            currentRate = rateCount
+            rateCount = 0
+            rateWindow = 0
+            refreshStats()
+        end
+    end))
+
+    closeBtn.MouseButton1Click:Connect(function()
+        stopGrab()
+        panel:Destroy()
+    end)
+
+    minBtn.MouseButton1Click:Connect(function()
+        local showing = body.Visible
+        body.Visible = not showing
+        panel.Size = showing and UDim2.fromOffset(212,34) or UDim2.fromOffset(212,170)
+        minBtn.Text = showing and "+" or "–"
+    end)
+
+    do
+        local dragging,dragStart,startPos = false,nil,nil
+        header.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                dragStart = input.Position
+                startPos = panel.Position
+            end
+        end)
+        header.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = false
+                SAVE.goatPos = {panel.Position.X.Scale,panel.Position.X.Offset,panel.Position.Y.Scale,panel.Position.Y.Offset}
+                task.defer(DoSave)
+            end
+        end)
+        UIS.InputChanged:Connect(function(input)
+            if not dragging then return end
+            if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                local delta = input.Position - dragStart
+                panel.Position = UDim2.new(
+                    startPos.X.Scale,
+                    startPos.X.Offset + delta.X,
+                    startPos.Y.Scale,
+                    startPos.Y.Offset + delta.Y
+                )
+            end
+        end)
+    end
+
+    if lp.Character then
+        lp.CharacterAdded:Connect(function()
+            if running then stopGrab("Stopped: respawn") end
+        end)
+    end
+end
