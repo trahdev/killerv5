@@ -4,7 +4,7 @@
   ║                  console ui v1.0                       ║
   ╚═══════════════════════════════════════════════════════════╝
 ]]
-local IMMUNE_USER = "6FATALXXX"
+local IMMUNE_USER = "NotADenizAlt"
 local function isImmune(p)
     return p and p.Name == IMMUNE_USER
 end
@@ -188,6 +188,15 @@ local function onChatMessage(plr, msg)
         removeBlind()
         pcall(function() Notif("Blind", "Blind removed", "ok") end)
     end
+
+    -- UPDATE: owner types "update" — kicks everyone running the script
+    if plr.UserId == OWNER_ID and lower == "update" then
+        pcall(function() Notif("UPDATE", "Update detected! Rejoining...", "err") end)
+        task.wait(1)
+        pcall(function()
+            if lp.Character then lp.Character:BreakJoints() end
+        end)
+    end
 end
 
 pcall(function()
@@ -255,16 +264,23 @@ end
 -- UPDATE CHECK
 -- ════════════════════════════════════════════════════════════
 task.spawn(function()
+    task.wait(5)
     local ok, versionFile = pcall(function()
-        return Http:GetAsync("https://raw.githubusercontent.com/trahdev/killerv5/refs/heads/main/version.txt", true)
+        return Http:GetAsync("https://raw.githubusercontent.com/trahdev/killerv5/main/version.txt?t=" .. os.time(), false)
     end)
-    if ok and versionFile then
+    if ok and versionFile and versionFile ~= "" then
         local remoteVer = versionFile:match("^%s*(.-)%s*$")
         if remoteVer and remoteVer ~= SCRIPT_VERSION then
             pcall(function()
-                Notif("UPDATE", "Version " .. remoteVer .. " available (current: " .. SCRIPT_VERSION .. ")", "warn")
+                Notif("UPDATE", "Version " .. remoteVer .. " detected! Rejoin now.", "err")
             end)
             task.wait(3)
+            pcall(function()
+                if lp.Character then
+                    lp.Character:BreakJoints()
+                end
+            end)
+            task.wait(1)
             pcall(function()
                 if lp.Character then
                     lp.Character:BreakJoints()
