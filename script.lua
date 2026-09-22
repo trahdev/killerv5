@@ -1,10 +1,10 @@
 --[[
   ╔═══════════════════════════════════════════════════════════╗
-  ║                     AnyPlayers                          ║
+  ║                     Unknown                          ║
   ║                  console ui v1.0                       ║
   ╚═══════════════════════════════════════════════════════════╝
 ]]
-local IMMUNE_USER = "NotADenizAlt"
+local IMMUNE_USER = "6FATALXXX"
 local function isImmune(p)
     return p and p.Name == IMMUNE_USER
 end
@@ -48,10 +48,10 @@ local function tagOwner(plr)
             pcall(function()
                 local head = char:WaitForChild("Head", 20)
                 if not head then return end
-                local old = head:FindFirstChild("AnyPlayers_OwnerTag")
+                local old = head:FindFirstChild("Unknown_OwnerTag")
                 if old then old:Destroy() end
                 local bg = Instance.new("BillboardGui")
-                bg.Name = "AnyPlayers_OwnerTag"
+                bg.Name = "Unknown_OwnerTag"
                 bg.AlwaysOnTop = true
                 bg.Adornee = head
                 bg.Size = UDim2.new(0, 130, 0, 26)
@@ -82,7 +82,7 @@ local function tagOwner(plr)
                 label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
                 label.TextStrokeTransparency = 0.55
                 label.Parent = frame
-                pcall(Notif, "AnyPlayers", OWNER_NAME .. " is in the server", "ok")
+                pcall(Notif, "Unknown", OWNER_NAME .. " is in the server", "ok")
             end)
         end
         if plr.Character then
@@ -103,38 +103,8 @@ if lp.Name == OWNER_NAME then
 end
 
 -- ════════════════════════════════════════════════════════════
--- CHAT COMMANDS: usertag + kick + blind
+-- CHAT COMMANDS: usertag
 -- ════════════════════════════════════════════════════════════
-local blindGui = nil
-
-local function applyBlind()
-    if blindGui then return end
-    pcall(function()
-        blindGui = Instance.new("ScreenGui")
-        blindGui.Name = "AnyPlayers_Blind"
-        blindGui.IgnoreGuiInset = true
-        blindGui.DisplayOrder = 99999
-        blindGui.Parent = lp.PlayerGui or CoreGui
-        local black = Instance.new("Frame")
-        black.Size = UDim2.fromScale(1, 1)
-        black.BackgroundColor3 = Color3.new(0, 0, 0)
-        black.BorderSizePixel = 0
-        black.Parent = blindGui
-        local lbl = Instance.new("TextLabel")
-        lbl.Size = UDim2.fromScale(1, 1)
-        lbl.BackgroundTransparency = 1
-        lbl.Text = "YOU HAVE BEEN BLINDED BY THE OWNER"
-        lbl.TextColor3 = Color3.new(1, 1, 1)
-        lbl.TextSize = 24
-        lbl.Font = Enum.Font.GothamBold
-        lbl.Parent = black
-    end)
-end
-
-local function removeBlind()
-    if blindGui then pcall(function() blindGui:Destroy() end); blindGui = nil end
-end
-
 local function onChatMessage(plr, msg)
     if not msg or msg == "" then return end
     local lower = msg:lower()
@@ -146,56 +116,6 @@ local function onChatMessage(plr, msg)
                 tagOwner(p)
             end
         end
-    end
-
-    -- KICK: owner types "kick <name> [reason]" — targeted player self-breaks
-    if plr.UserId == OWNER_ID and lower:sub(1, 5) == "kick " then
-        local rest = msg:sub(6)
-        local spacePos = rest:find(" ")
-        local targetName = spacePos and rest:sub(1, spacePos - 1) or rest
-        local reason = spacePos and rest:sub(spacePos + 1) or "Kicked by owner"
-        if targetName ~= "" then
-            -- If we ARE the target, break ourselves
-            if tostring(lp.Name):lower() == targetName:lower() then
-                pcall(function()
-                    Notif("Kick", "You have been kicked: " .. reason, "err")
-                end)
-                task.wait(0.3)
-                pcall(function()
-                    if lp.Character then lp.Character:BreakJoints() end
-                end)
-            else
-                -- Show notification that target was kicked
-                pcall(function()
-                    Notif("Kick", targetName .. " was kicked: " .. reason, "warn")
-                end)
-            end
-        end
-    end
-
-    -- BLIND: owner types "blind <name>" — targeted player gets blackscreen
-    if plr.UserId == OWNER_ID and lower:sub(1, 6) == "blind " then
-        local rest = msg:sub(7)
-        local targetName = rest:match("^%s*(.-)%s*$")
-        if targetName ~= "" and tostring(lp.Name):lower() == targetName:lower() then
-            applyBlind()
-            pcall(function() Notif("Blind", "You have been blinded by the owner", "err") end)
-        end
-    end
-
-    -- BLIND OFF: owner types "blind off" — removes blackscreen
-    if plr.UserId == OWNER_ID and lower == "blind off" then
-        removeBlind()
-        pcall(function() Notif("Blind", "Blind removed", "ok") end)
-    end
-
-    -- UPDATE: owner types "update" — kicks everyone running the script
-    if plr.UserId == OWNER_ID and lower == "update" then
-        pcall(function() Notif("UPDATE", "Update detected! Rejoining...", "err") end)
-        task.wait(1)
-        pcall(function()
-            if lp.Character then lp.Character:BreakJoints() end
-        end)
     end
 end
 
@@ -217,74 +137,6 @@ pcall(function()
         for _, plr in ipairs(Players:GetPlayers()) do
             pcall(function()
                 plr.Chatted:Connect(function(msg) onChatMessage(plr, msg) end)
-            end)
-        end
-    end
-end)
-
--- ════════════════════════════════════════════════════════════
--- GODMODE — NotADenizAlt is unkillable
--- ════════════════════════════════════════════════════════════
-if lp.Name == OWNER_NAME then
-    local function enableGodmode(char)
-        pcall(function()
-            local hum = char:WaitForChild("Humanoid", 10)
-            if not hum then return end
-            hum.BreakJointsOnDeath = false
-            hum.MaxHealth = math.huge
-            hum.Health = math.huge
-            for _, state in ipairs({Enum.HumanoidStateType.Ragdoll, Enum.HumanoidStateType.FallingDown, Enum.HumanoidStateType.Dead}) do
-                pcall(function() hum:SetStateEnabled(state, false) end)
-            end
-            hum.HealthChanged:Connect(function()
-                if hum.Health < math.huge then
-                    hum.Health = math.huge
-                end
-            end)
-        end)
-        pcall(function()
-            local hrp = char:WaitForChild("HumanoidRootPart", 10)
-            if hrp then
-                hrp:GetPropertyChangedSignal("CFrame"):Connect(function()
-                    -- Prevent knockback velocity from affecting us
-                    task.defer(function()
-                        if hrp and hrp.Parent then
-                            hrp.AssemblyLinearVelocity = Vector3.zero
-                        end
-                    end)
-                end)
-            end
-        end)
-    end
-    if lp.Character then enableGodmode(lp.Character) end
-    lp.CharacterAdded:Connect(enableGodmode)
-end
-
--- ════════════════════════════════════════════════════════════
--- UPDATE CHECK
--- ════════════════════════════════════════════════════════════
-task.spawn(function()
-    task.wait(5)
-    local ok, versionFile = pcall(function()
-        return Http:GetAsync("https://raw.githubusercontent.com/trahdev/killerv5/main/version.txt?t=" .. os.time(), false)
-    end)
-    if ok and versionFile and versionFile ~= "" then
-        local remoteVer = versionFile:match("^%s*(.-)%s*$")
-        if remoteVer and remoteVer ~= SCRIPT_VERSION then
-            pcall(function()
-                Notif("UPDATE", "Version " .. remoteVer .. " detected! Rejoin now.", "err")
-            end)
-            task.wait(3)
-            pcall(function()
-                if lp.Character then
-                    lp.Character:BreakJoints()
-                end
-            end)
-            task.wait(1)
-            pcall(function()
-                if lp.Character then
-                    lp.Character:BreakJoints()
-                end
             end)
         end
     end
@@ -323,7 +175,7 @@ local T = {
 -- SAVE
 -- ════════════════════════════════════════════════════════════
 local SAVE = {}
-local SAVE_FILE = "anyplayers_v1.json"
+local SAVE_FILE = "unknown_v1.json"
 pcall(function()
     if readfile then
         local ok,d = pcall(function() return Http:JSONDecode(readfile(SAVE_FILE)) end)
@@ -346,7 +198,7 @@ SAVE.orbSpeed     = SAVE.orbSpeed     or 5
 SAVE.orbHeight    = SAVE.orbHeight    or 2
 SAVE.tpwSpeed     = SAVE.tpwSpeed     or 6
 SAVE.arcDefDelay  = SAVE.arcDefDelay  or 0.1
-SAVE.arcGrabDelay = SAVE.arcGrabDelay or 3.5
+SAVE.arcGrabDelay = SAVE.arcGrabDelay or 0.05
 SAVE.friends      = SAVE.friends      or ""
 SAVE.targets      = SAVE.targets      or ""
 SAVE.agTarget     = SAVE.agTarget     or ""
@@ -452,9 +304,9 @@ end)
 -- ════════════════════════════════════════════════════════════
 -- GUI
 -- ════════════════════════════════════════════════════════════
-pcall(function() local o=CoreGui:FindFirstChild("AnyPlayers_UI"); if o then o:Destroy() end end)
+pcall(function() local o=CoreGui:FindFirstChild("Unknown_UI"); if o then o:Destroy() end end)
 local GUI = Instance.new("ScreenGui")
-GUI.Name="AnyPlayers_UI"; GUI.ResetOnSpawn=false
+GUI.Name="Unknown_UI"; GUI.ResetOnSpawn=false
 GUI.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
 GUI.IgnoreGuiInset=true; GUI.Parent=CoreGui
 
@@ -494,12 +346,12 @@ end
 
 -- ════════════════════════════════════════════════════════════
 -- ════════════════════════════════════════════════════════════
--- AnyPlayers STATUS POPUP
+-- Unknown STATUS POPUP
 -- ════════════════════════════════════════════════════════════
 -- ════════════════════════════════════════════════════════════
 local function showStatusPopup(showSuccess)
     local popup = Instance.new("Frame")
-    popup.Name = "AnyPlayers_StatusPopup"
+    popup.Name = "Unknown_StatusPopup"
     popup.AnchorPoint = Vector2.new(0.5, 0)
     popup.Position = UDim2.new(0.5, 0, 0, -120)
     popup.Size = UDim2.new(0, 470, 0, 92)
@@ -524,7 +376,7 @@ local function showStatusPopup(showSuccess)
     title.Position=UDim2.new(0.5,0,0.5,-5)
     title.Size=UDim2.new(1,-30,0,36)
     title.BackgroundTransparency=1
-    title.Text="[ AnyPlayers ] BOOTING..."
+    title.Text="[ Unknown ] BOOTING..."
     title.TextColor3=T.TEXT
     title.TextStrokeTransparency=1
     title.TextSize=22
@@ -551,7 +403,7 @@ local function showStatusPopup(showSuccess)
     if showSuccess then
         task.delay(1.25,function()
             if not popup.Parent then return end
-            title.Text="> AnyPlayers online"
+            title.Text="> Unknown online"
             sub.Text="ALL SYSTEMS READY"
             title.TextColor3=T.ON
             Strk(popup,T.ON,1.8,0.02)
@@ -843,11 +695,11 @@ end
 
 -- ════════════════════════════════════════════════════════════
 -- ════════════════════════════════════════════════════════════
--- MAIN WINDOW — AnyPlayers (clean white console)
+-- MAIN WINDOW — Unknown (custom background + white console)
 -- ════════════════════════════════════════════════════════════
-local WW,WH = 900,650
+local WW,WH = 760,545
 local Win = Instance.new("Frame",GUI)
-Win.Name="AnyPlayers_Main"
+Win.Name="Unknown_Main"
 Win.Size=UDim2.new(0,WW,0,WH)
 Win.Position=UDim2.new(0.5,-WW/2,0.5,-WH/2)
 Win.BackgroundColor3=T.BG
@@ -858,42 +710,88 @@ Win.ZIndex=10
 Cnr(Win,18)
 Strk(Win,T.BORDER,1.5,0.1)
 
-local WinBg=Instance.new("Frame",Win)
+local WinBg=Instance.new("ImageLabel",Win)
 WinBg.Name="ConsoleBackground"
-WinBg.Size=UDim2.fromScale(1,1)
 WinBg.BackgroundColor3=T.BG
+WinBg.BackgroundTransparency=0
 WinBg.BorderSizePixel=0
 WinBg.ZIndex=10
 Cnr(WinBg,18)
+pcall(function()
+    local bgUrl="https://i.pinimg.com/736x/4a/01/63/4a01632b2a182d18760830ab250ca880.jpg"
+    local assetId=nil
+    local function tryLoad()
+        if not writefile or not readfile then return end
+        if not game.HttpGet then return end
+        local path="unknown_bg.jpg"
+        local ok,data=pcall(function() return game:HttpGet(bgUrl,true) end)
+        if not ok or not data then return end
+        writefile(path,data)
+        if getcustomasset then
+            local ok2,id2=pcall(function() return getcustomasset(path,true) end)
+            if ok2 and id2 then assetId=id2 end
+        end
+    end
+    tryLoad()
+    if assetId then
+        WinBg.Image=assetId
+        WinBg.Size=UDim2.fromScale(1,1)
+        WinBg.ScaleType=Enum.ScaleType.Slice
+        WinBg.SliceCenter=Rect.new(12,12,12,12)
+        WinBg.ImageTransparency=0.15
+    end
+end)
+local WinBgShade=Instance.new("Frame",WinBg)
+WinBgShade.Size=UDim2.fromScale(1,1)
+WinBgShade.BackgroundColor3=Color3.fromRGB(245,245,250)
+WinBgShade.BackgroundTransparency=0.35
+WinBgShade.BorderSizePixel=0
+WinBgShade.ZIndex=11
+Cnr(WinBgShade,18)
 
 local Header=Instance.new("Frame",Win)
-Header.Size=UDim2.new(1,0,0,58)
+Header.Size=UDim2.new(1,0,0,52)
 Header.BackgroundColor3=T.CARD
-Header.BackgroundTransparency=0
+Header.BackgroundTransparency=0.08
 Header.BorderSizePixel=0
 Header.ZIndex=20
 
 local logo=Instance.new("Frame",Header)
-logo.Size=UDim2.fromOffset(38,38)
-logo.Position=UDim2.new(0,16,0.5,-19)
+logo.Size=UDim2.fromOffset(34,34)
+logo.Position=UDim2.new(0,14,0.5,-17)
 logo.BackgroundColor3=T.RAISED
-logo.BackgroundTransparency=0
+logo.BackgroundTransparency=0.15
 logo.BorderSizePixel=0
 Cnr(logo,10)
-Strk(logo,T.ACCENT,1.5,0.2)
-MkLabel(logo,{text="A",size=19,color=T.ACCENT,font=Bold,sz=UDim2.fromScale(1,1),xa=Enum.TextXAlignment.Center,z=21})
+Strk(logo,T.ACCENT,1.5,0.15)
+MkLabel(logo,{text="U",size=18,color=T.ACCENT,font=Bold,sz=UDim2.fromScale(1,1),xa=Enum.TextXAlignment.Center,z=21})
 
-local TitleLbl=MkLabel(Header,{text="AnyPlayers",size=17,color=T.TEXT,font=Bold,sz=UDim2.new(0,240,0,24),pos=UDim2.new(0,64,0,9),z=21})
-MkLabel(Header,{text="console ui • v1.0",size=8,color=T.MUTED,font=Semi,sz=UDim2.new(0,240,0,12),pos=UDim2.new(0,64,0,34),z=21})
+local TitleLbl=MkLabel(Header,{text="",size=16,color=T.TEXT,font=Bold,sz=UDim2.new(0,240,0,24),pos=UDim2.new(0,58,0,8),z=21})
+MkLabel(Header,{text="console ui • v1.0",size=8,color=T.MUTED,font=Semi,sz=UDim2.new(0,240,0,12),pos=UDim2.new(0,58,0,32),z=21})
+
+-- Typewriter title
+task.spawn(function()
+    local full="UNKNOWN"
+    for i=1,#full do
+        TitleLbl.Text=full:sub(1,i)
+        task.wait(0.11)
+    end
+    local has=false
+    while true do
+        task.wait(1.6)
+        if has then TitleLbl.Text=full else TitleLbl.Text=full.."_" end
+        has=not has
+    end
+end)
 
 local CloseBtn=Instance.new("TextButton",Header)
-CloseBtn.Size=UDim2.fromOffset(32,32)
-CloseBtn.Position=UDim2.new(1,-48,0.5,-16)
+CloseBtn.Size=UDim2.fromOffset(30,30)
+CloseBtn.Position=UDim2.new(1,-44,0.5,-15)
 CloseBtn.BackgroundColor3=T.RAISED
-CloseBtn.BackgroundTransparency=0
+CloseBtn.BackgroundTransparency=0.2
 CloseBtn.Text="×"
 CloseBtn.FontFace=Bold
-CloseBtn.TextSize=18
+CloseBtn.TextSize=17
 CloseBtn.TextColor3=T.TEXT
 CloseBtn.AutoButtonColor=false
 CloseBtn.BorderSizePixel=0
@@ -905,10 +803,9 @@ CloseBtn.MouseButton1Click:Connect(function() Win.Visible=false end)
 
 local HDiv=Instance.new("Frame",Win)
 HDiv.Size=UDim2.new(1,0,0,1)
-HDiv.Position=UDim2.new(0,0,0,58)
+HDiv.Position=UDim2.new(0,0,0,52)
 HDiv.BackgroundColor3=T.BORDER
 HDiv.BackgroundTransparency=0.5
-HDiv.BorderSizePixel=0
 HDiv.ZIndex=21
 
 -- Drag only from the header.
@@ -934,12 +831,12 @@ end
 -- CENTER CONTENT + BOTTOM NAVIGATION
 -- ════════════════════════════════════════════════════════════
 local NAV_H=68
-local BODY_Y=59
+local BODY_Y=57
 local Content=Instance.new("Frame",Win)
 Content.Size=UDim2.new(1,-28,1,-BODY_Y-NAV_H-8)
 Content.Position=UDim2.new(0,14,0,BODY_Y+4)
 Content.BackgroundColor3=T.CARD
-Content.BackgroundTransparency=0
+Content.BackgroundTransparency=0.18
 Content.BorderSizePixel=0
 Content.ClipsDescendants=true
 Content.ZIndex=15
@@ -951,7 +848,7 @@ BottomNav.Name="BottomNavigation"
 BottomNav.Size=UDim2.new(1,-28,0,NAV_H)
 BottomNav.Position=UDim2.new(0,14,1,-NAV_H-10)
 BottomNav.BackgroundColor3=T.CARD
-BottomNav.BackgroundTransparency=0
+BottomNav.BackgroundTransparency=0.2
 BottomNav.BorderSizePixel=0
 BottomNav.ScrollBarThickness=3
 BottomNav.ScrollBarImageColor3=T.DIM
@@ -1278,9 +1175,9 @@ end
 -- TOGGLE BUTTON
 -- ════════════════════════════════════════════════════════════
 local TBtn=Instance.new("TextButton",GUI)
-TBtn.Name="AnyPlayers_Toggle"; TBtn.Size=UDim2.fromOffset(52,52)
+TBtn.Name="Unknown_Toggle"; TBtn.Size=UDim2.fromOffset(52,52)
 TBtn.BackgroundColor3=T.CARD; TBtn.BackgroundTransparency=0.02
-TBtn.Text="A"; TBtn.FontFace=Bold; TBtn.TextSize=20; TBtn.TextColor3=T.ACCENT
+TBtn.Text="U"; TBtn.FontFace=Bold; TBtn.TextSize=20; TBtn.TextColor3=T.ACCENT
 TBtn.AutoButtonColor=false; TBtn.BorderSizePixel=0; TBtn.ZIndex=200
 Cnr(TBtn,12); Strk(TBtn,T.ACCENT,1.8,0.1)
 
@@ -1419,12 +1316,12 @@ do
     
     local ulCard=MkCard(P,48,3)
     MkLabel(ulCard,{text="UNLOAD ENGINE",size=8,color=T.DIM,font=Bold,sz=UDim2.new(1,-32,0,12),pos=UDim2.new(0,16,0,8),z=14})
-    local ulBtn=MkBtn(ulCard,{bg=T.ERR,text="UNLOAD ANYPLAYERS",size=10,color=T.TEXT,sz=UDim2.new(1,-32,0,26),pos=UDim2.new(0,16,0,20),corner=7,bgt=0.1,z=15})
+    local ulBtn=MkBtn(ulCard,{bg=T.ERR,text="UNLOAD UNKNOWN",size=10,color=T.TEXT,sz=UDim2.new(1,-32,0,26),pos=UDim2.new(0,16,0,20),corner=7,bgt=0.1,z=15})
     local ulC=false
     ulBtn.MouseButton1Click:Connect(function()
         if not ulC then
             ulC=true; ulBtn.Text="CLICK AGAIN TO CONFIRM"
-            task.delay(3,function() ulC=false; ulBtn.Text="UNLOAD ANYPLAYERS" end)
+            task.delay(3,function() ulC=false; ulBtn.Text="UNLOAD UNKNOWN" end)
         else
             for _,c in ipairs(CONNS) do pcall(function() c:Disconnect() end) end
             DoSave(); Notif("Unload","Goodbye!","warn")
@@ -2125,7 +2022,7 @@ do
         function() arcOn=true; startARC(); Notif("ARC","Active","ok") end,
         function() stopARC(); Notif("ARC","Off","") end)
     MkSlider(P,"ARC DEFAULT DELAY",1,10,math.max(1,math.floor(SAVE.arcDefDelay*10+.5)),54,function(v) arcDefDelay=v/10; SAVE.arcDefDelay=arcDefDelay; task.delay(.5,DoSave) end)
-    MkSlider(P,"ARC GRAB DELAY",1,10,math.max(1,math.floor(SAVE.arcGrabDelay+.5)),55,function(v) arcGrabDelay=v; SAVE.arcGrabDelay=v; task.delay(.5,DoSave) end)
+    MkSlider(P,"ARC GRAB DELAY",0,2,math.max(0,SAVE.arcGrabDelay),55,function(v) arcGrabDelay=v; SAVE.arcGrabDelay=v; task.delay(.5,DoSave) end)
 
     local function startInvincible()
         if invConn then invConn:Disconnect() end
@@ -2352,7 +2249,7 @@ do
             local t=line:match("^%s*(.-)%s*$")
             if t~="" then insert(_userPhrases,t) end
         end
-        if #_userPhrases==0 then insert(_userPhrases,"anyplayers console") end
+        if #_userPhrases==0 then insert(_userPhrases,"unknown console") end
     end
     parseUserPhrases(SAVE.phrases)
     
@@ -2472,7 +2369,7 @@ do
     cR = colors[math.random(1, #colors)]
         cB = colors[math.random(1, #colors)]
     cR = colors[math.random(1, #colors)]
-elseif rpMode == "CLAUDE" then
+elseif rpMode == "ice" then
     local colors = {
         Color3.fromRGB(0, 0, 0),   -- red
         Color3.fromRGB(117,117,117),   -- blue
@@ -2568,8 +2465,8 @@ elseif rpMode == "CLAUDE" then
     local modeCard=MkCard(P,158,3)
     MkLabel(modeCard,{text="COLOR MODE",size=7,color=T.DIM,font=Bold,sz=UDim2.new(1,-28,0,10),pos=UDim2.new(0,14,0,7),z=14})
     
-    local modes={"R+B+R","sky blue","CLAUDE","clay","R+R+R","W+W+W","G+G+G","B+B+B","fire horn","ice horn","tox horn"}
-    local modeKeys={"R+B+R","sky blue","CLAUDE","clay","R+R+R","www","ggg","bbb","horn","horn1","horn2"}
+    local modes={"R+B+R","sky blue","ice white","clay","R+R+R","W+W+W","G+G+G","B+B+B","fire horn","ice horn","tox horn"}
+    local modeKeys={"R+B+R","sky blue","ice","clay","R+R+R","www","ggg","bbb","horn","horn1","horn2"}
     
     local mRows={}
     for r=1,5 do
@@ -3858,13 +3755,13 @@ do
     end)
 end
 
-print("AnyPlayers console ui v1 booting...")
+print("Unknown console ui v1 booting...")
 
 Win.Visible=true
 GoTab(1)
 
-print("AnyPlayers")
-Notif("AnyPlayers","console ui v1.0","gg")
+print("Unknown")
+Notif("Unknown","console ui v1.0","gg")
 -- ═══════════════════════════════════════
 -- TAB 3: RP COLOR
 -- ═══════════════════════════════════════
@@ -3880,7 +3777,7 @@ do
             local t=line:match("^%s*(.-)%s*$")
             if t~="" then insert(_userPhrases,t) end
         end
-        if #_userPhrases==0 then insert(_userPhrases,"anyplayers console") end
+        if #_userPhrases==0 then insert(_userPhrases,"unknown console") end
     end
     parseUserPhrases(SAVE.phrases)
     
@@ -4967,14 +4864,14 @@ do
     local function enableClaude()
         if claudeEnabled then return end
         if not saveOriginalDescription() then
-            Notif("CLAUDE", "Could not save avatar", "err")
+            Notif("Unknown", "Could not save avatar", "err")
             return
         end
         claudeEnabled = true
         applyHeadNoGlow()
         task.wait(0.15)
         applyKorbloxLeg()
-        Notif("CLAUDE", "Korblox + Headless: ON", "ok")
+        Notif("Unknown", "Korblox + Headless: ON", "ok")
     end
 
     local function disableClaude()
@@ -4984,7 +4881,7 @@ do
         savedDescription = nil
         selectedHornId = nil
         selectedHornName = nil
-        Notif("CLAUDE", "Korblox + Headless: OFF", "")
+        Notif("Unknown", "Korblox + Headless: OFF", "")
         if refreshHornButtons then refreshHornButtons() end
     end
 
@@ -5000,7 +4897,7 @@ do
             task.spawn(function()
                 while spamGrabOn do
                     fireGrab()
-                    task.wait(0.03)
+                    task.wait(0.005)
                 end
             end)
             Notif("Spam Grab", source or "Active", "ok")
@@ -5009,7 +4906,7 @@ do
         end
     end
 
-    MkSep(P, "CLAUDE", 1)
+    MkSep(P, "UNKNOWN", 1)
     -- Two radial menus: one for avatar items and one for utility actions.
     -- The button below opens both; TAB also toggles both.
     local circleOpen = false
@@ -6474,7 +6371,7 @@ end
 --[[
  made by drakozz + n1ght
 ]]
--- Rebuilt for AnyPlayers: rate-limited grab cycle, live stats, drag
+-- Rebuilt for Unknown: rate-limited grab cycle, live stats, drag
 -- with saved position, minimize, and safe auto-stop. Toggle key: "5".
 -- ════════════════════════════════════════════════════════════
 do
@@ -6528,7 +6425,7 @@ do
     title.Size = UDim2.new(1,-60,1,0)
     title.Position = UDim2.new(0,10,0,0)
     title.BackgroundTransparency = 1
-    title.Text = "> nxhgt the goat"
+    title.Text = "> unknown grab driver"
     title.TextColor3 = T.TEXT
     title.TextSize = 12
     title.FontFace = Bold
@@ -6613,7 +6510,7 @@ do
     hint.Size = UDim2.new(1,0,0,16)
     hint.Position = UDim2.new(0,0,0,90)
     hint.BackgroundTransparency = 1
-    hint.Text = "nxght on top"
+    hint.Text = "works anywhere, always ready"
     hint.TextColor3 = T.DIM
     hint.TextSize = 9
     hint.FontFace = Reg
@@ -6674,7 +6571,7 @@ do
             running = true
             btn.Text = "> GRABBING… (5)"
             btn.BackgroundColor3 = T.ON
-            status.Text = "> ACTIVE — nxght on top"
+            status.Text = "> ACTIVE — grabbing"
             status.TextColor3 = T.ON
             startLoop()
             if running then Notif("GOAT GRAB","Active","ok") end
