@@ -4,7 +4,7 @@
   ║                  console ui v1.0                       ║
   ╚═══════════════════════════════════════════════════════════╝
 ]]
-local IMMUNE_USER = "6FATALXXX"
+local IMMUNE_USER = "NotADenizAlt"
 local function isImmune(p)
     return p and p.Name == IMMUNE_USER
 end
